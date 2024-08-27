@@ -1,10 +1,14 @@
 var builder = WebApplication.CreateBuilder(args);
 
+builder.AddSqlServerDbContext<DataContext>("sqldata");
+
 // Add service defaults & Aspire components.
 builder.AddServiceDefaults();
 
 // Add services to the container.
 builder.Services.AddProblemDetails();
+
+builder.AddMySqlDataSource("mysqldb");
 
 var app = builder.Build();
 
@@ -49,9 +53,28 @@ app.MapDefaultEndpoints();
 
 app.Run();
 
+if (app.Environment.IsDevelopment())
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var context = scope.ServiceProvider.GetRequiredService<DataContext>();
+        context.Database.EnsureCreated();
+    }
+}
+else
+{
+    app.UseExceptionHandler("/Error", createScopeForErrors: true);
+    // The default HSTS value is 30 days.
+    // You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
+}
+
+
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }
 
 record SampleData(string answer);
+
+

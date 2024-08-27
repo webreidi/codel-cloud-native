@@ -10,14 +10,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Codel-Cloud-Native.ApiService\Codel-Cloud-Native.ApiService.csproj" />
+    <ProjectReference Include="../Codel-Cloud-Native.ApiService/Codele.ApiService.csproj" />
     <ProjectReference Include="..\Codel-Cloud-Native.Web\Codel-Cloud-Native.Web.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.AppHost" Version="8.0.1" />
+    <PackageReference Include="Aspire.Hosting.MySql" Version="8.1.0" />
     <PackageReference Include="Aspire.Hosting.Redis" Version="8.0.1" />
     <PackageReference Include="Aspire.MySqlConnector" Version="8.1.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.8">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
   </ItemGroup>
 
 </Project>

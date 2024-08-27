@@ -4,17 +4,17 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 var cache = builder.AddRedis("cache");
 
-var mysql = builder.AddMySql("mysql");
-var mysqldb = mysql.AddDatabase("mysqldb");
+var password = builder.AddParameter("mysql-password", secret: true);
 
-var apiService = builder.AddProject<Projects.Codel_Cloud_Native_ApiService>("apiservice")
+var mysql = builder.AddMySql("test-mysql", password);
+var mysqldb = mysql.AddDatabase("words");
+
+var apiService = builder.AddProject<Projects.Codele_ApiService>("apiservice")
                         .WithReference(mysqldb);
 
 builder.AddProject<Projects.Codel_Cloud_Native_Web>("webfrontend")
     .WithExternalHttpEndpoints()
     .WithReference(cache)
     .WithReference(apiService);
-
-builder.AddMySqlDataSource("MySqConnection");
 
 builder.Build().Run();
