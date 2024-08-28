@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public class MyDb1Context(DbContextOptions<MyDb1Context> options) : DbContext(options)
 {
-	public DbSet<Words> Entries
+	public DbSet<Words> Words
 	{
 		get; set;
 	}

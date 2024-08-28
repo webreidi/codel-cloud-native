@@ -8,8 +8,13 @@
 	  <GenerateRuntimeConfigurationFiles>True</GenerateRuntimeConfigurationFiles>
   </PropertyGroup>
 
-  <ItemGroup>
+	<ItemGroup>
+		<Compile Include="..\Shared\RetryingSqlServerRetryingExecutionStrategy.cs" Link="RetryingSqlServerRetryingExecutionStrategy.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
     <ProjectReference Include="..\Codel-Cloud-Native.ServiceDefaults\Codel-Cloud-Native.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\Codele.ApiModel\Codele.ApiModel.csproj" />
     <ProjectReference Include="..\DBMigrations\DBMigrations.csproj" />
   </ItemGroup>
 

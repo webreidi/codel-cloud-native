@@ -16,7 +16,16 @@ internal class Program
 		// Add services to the container.
 		builder.Services.AddProblemDetails();
 
-		builder.AddMySqlDataSource("mysqldb");
+		builder.Services.AddDbContextPool<MyDb1Context>(options =>
+	options.UseMySql(builder.Configuration.GetConnectionString("mysqldb"), new MySqlServerVersion(new Version()), sqlOptions =>
+	{
+		sqlOptions.MigrationsAssembly("Codele.MigrationService");
+		// Workaround for https://github.com/dotnet/aspire/issues/1023
+		sqlOptions.ExecutionStrategy(c => new RetryingSqlServerRetryingExecutionStrategy(c));
+	}));
+		builder.EnrichMySqlDbContext<MyDb1Context>(settings =>
+			// Disable Aspire default retries as we're using a custom execution strategy
+			settings.DisableRetry = true);
 
 		var app = builder.Build();
 
@@ -27,19 +36,15 @@ internal class Program
 		{
 	"Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
 };
-
-		List<Words> GetWords = [];
-
 		string[] words = [];
 
-		async Task OnInitializedAsync(DataContext dataContext) => GetWords = await dataContext.Answers.ToListAsync();
-		foreach (var word in GetWords)
+		app.MapGet("/sample-data", async(MyDb1Context context) =>
 		{
-			words.Append(word.Answer);
-		}
-
-		app.MapGet("/sample-data", () =>
-		{
+			var answers = await context.Words.ToListAsync();
+			foreach (var word in answers)
+			{
+				words.Append(word.Answer);
+			}
 			var answer = Enumerable.Range(1, 14).Select(index =>
 					new SampleData
 					(
