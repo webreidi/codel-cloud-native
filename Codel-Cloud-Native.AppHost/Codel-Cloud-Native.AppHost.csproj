@@ -13,6 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Codel-Cloud-Native.ApiService\Codele.ApiService.csproj" />
     <ProjectReference Include="..\Codel-Cloud-Native.Web\Codel-Cloud-Native.Web.csproj" />
+    <ProjectReference Include="..\Codele.MigrationService\Codele.MigrationService.csproj" />
   </ItemGroup>
 
   <ItemGroup>

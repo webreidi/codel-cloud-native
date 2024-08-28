@@ -17,4 +17,7 @@ builder.AddProject<Projects.Codel_Cloud_Native_Web>("webfrontend")
     .WithReference(cache)
     .WithReference(apiService);
 
+builder.AddProject<Projects.Codele_MigrationService>("migration")
+	   .WithReference(mysql);
+
 builder.Build().Run();
