@@ -1,16 +1,9 @@
-using System;
-
 namespace Codele.ApiService.Data;
 
-public class DataContext : DbContext
+public class DataContext(DbContextOptions options) : DbContext(options)
 {
     
     protected readonly IConfiguration Configuration;
-
-    public DataContext(DbContextOptions<DataContext> options, IConfiguration configuration) : base(options)
-    {
-        Configuration = configuration;
-    }
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
