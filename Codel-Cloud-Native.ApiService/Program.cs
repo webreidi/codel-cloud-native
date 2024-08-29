@@ -1,6 +1,7 @@
 using System.Net.Sockets;
 using System.Reflection.Metadata;
 using Aspire.Pomelo.EntityFrameworkCore.MySql;
+using MySqlConnector;
 
 internal class Program
 {
@@ -8,7 +9,8 @@ internal class Program
 	{
 		var builder = WebApplication.CreateBuilder(args);
 
-		builder.AddMySqlDbContext<DataContext>("mysqldb");
+		builder.AddMySqlDataSource("words");
+		builder.AddMySqlDbContext<MyDb1Context>("mysqldb");
 
 		// Add service defaults & Aspire components.
 		builder.AddServiceDefaults();
@@ -16,16 +18,20 @@ internal class Program
 		// Add services to the container.
 		builder.Services.AddProblemDetails();
 
-		builder.Services.AddDbContextPool<MyDb1Context>(options =>
-	options.UseMySql(builder.Configuration.GetConnectionString("mysqldb"), new MySqlServerVersion(new Version()), sqlOptions =>
-	{
-		sqlOptions.MigrationsAssembly("Codele.MigrationService");
-		// Workaround for https://github.com/dotnet/aspire/issues/1023
-		sqlOptions.ExecutionStrategy(c => new RetryingSqlServerRetryingExecutionStrategy(c));
-	}));
-		builder.EnrichMySqlDbContext<MyDb1Context>(settings =>
-			// Disable Aspire default retries as we're using a custom execution strategy
-			settings.DisableRetry = true);
+		//	builder.Services.AddDbContextPool<MyDb1Context>(options =>
+		//options.UseMySql(builder.Configuration.GetConnectionString("mysqldb"), new MySqlServerVersion(new Version()), sqlOptions =>
+		//{
+		//	sqlOptions.MigrationsAssembly("Codele.MigrationService");
+		//	// Workaround for https://github.com/dotnet/aspire/issues/1023
+		//	sqlOptions.ExecutionStrategy(c => new RetryingSqlServerRetryingExecutionStrategy(c));
+		//}));
+		//	builder.EnrichMySqlDbContext<MyDb1Context>(settings =>
+		//		// Disable Aspire default retries as we're using a custom execution strategy
+		//		settings.DisableRetry = true);
+
+
+		builder.Services.AddProblemDetails();
+		builder.Services.AddEndpointsApiExplorer();
 
 		var app = builder.Build();
 
@@ -38,13 +44,26 @@ internal class Program
 };
 		string[] words = [];
 
-		app.MapGet("/sample-data", async(MyDb1Context context) =>
+		app.MapGet("/sample-data", async (MySqlConnection db) =>
 		{
-			var answers = await context.Words.ToListAsync();
-			foreach (var word in answers)
+			using var command = db.CreateCommand();
+			command.CommandText = "SELECT Id, word FROM words";
+			using var reader = await command.ExecuteReaderAsync();
+			while (await reader.ReadAsync())
 			{
-				words.Append(word.Answer);
+				words.Append(reader.GetString(1));
 			}
+			//const string sql = """
+   //             SELECT Id, word
+   //             FROM words
+   //             """;
+			//var connection = await db.OpenAsync();
+			//var answers = await db.QueryAsync<Words>(sql);
+			//foreach (var word in answers)
+			//{
+			//	words.Append(word.Answer);
+			//}
+
 			var answer = Enumerable.Range(1, 14).Select(index =>
 					new SampleData
 					(
@@ -52,7 +71,24 @@ internal class Program
 					))
 					.ToArray();
 			return answer;
+
 		});
+
+		//app.MapGet("/sample-data", async(MyDb1Context context) =>
+		//{
+		//	var answers = await context.Words.ToListAsync();
+		//	foreach (var word in answers)
+		//	{
+		//		words.Append(word.Answer);
+		//	}
+		//	var answer = Enumerable.Range(1, 14).Select(index =>
+		//			new SampleData
+		//			(
+		//				words[Random.Shared.Next(words.Length)]
+		//			))
+		//			.ToArray();
+		//	return answer;
+		//});
 
 		app.MapGet("/weatherforecast", () =>
 		{
@@ -73,7 +109,7 @@ internal class Program
 		{
 			using (var scope = app.Services.CreateScope())
 			{
-				var context = scope.ServiceProvider.GetRequiredService<DataContext>();
+				var context = scope.ServiceProvider.GetRequiredService<MyDb1Context>();
 				context.Database.EnsureCreated();
 			}
 		} else

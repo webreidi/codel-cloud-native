@@ -1,0 +1,28 @@
+CREATE TABLE IF NOT EXISTS `words`
+(
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `word` varchar(5) NOT NULL,
+    PRIMARY KEY (`id`)
+);
+
+-- Insert some sample data into the Catalog table only if the table is empty
+INSERT INTO words (word)
+SELECT *
+FROM (
+        SELECT 'coder' UNION ALL
+        SELECT 'write' UNION ALL
+        SELECT 'cobol' UNION ALL
+        SELECT 'array' UNION ALL
+        SELECT 'false' UNION ALL
+        SELECT 'build' UNION ALL
+        SELECT 'table' UNION ALL
+        SELECT 'techy' UNION ALL
+        SELECT 'razor' UNION ALL
+        SELECT 'azure' UNION ALL
+        SELECT 'agile' UNION ALL
+        SELECT 'cloud' UNION ALL
+        SELECT 'serve' UNION ALL
+        SELECT 'debug' 
+    ) data
+-- This clause ensures the rows are only inserted if the table is empty
+WHERE NOT EXISTS (SELECT NULL FROM words)
