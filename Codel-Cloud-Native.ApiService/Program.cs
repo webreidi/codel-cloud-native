@@ -2,6 +2,8 @@ using System.Net.Sockets;
 using System.Reflection.Metadata;
 using Aspire.Pomelo.EntityFrameworkCore.MySql;
 using MySqlConnector;
+using Microsoft.Data.SqlClient;
+using Dapper;
 
 internal class Program
 {
@@ -9,26 +11,13 @@ internal class Program
 	{
 		var builder = WebApplication.CreateBuilder(args);
 
-		builder.AddMySqlDataSource("words");
-		builder.AddMySqlDbContext<MyDb1Context>("mysqldb");
+		builder.AddSqlServerClient("sqlserver");
 
 		// Add service defaults & Aspire components.
 		builder.AddServiceDefaults();
 
 		// Add services to the container.
 		builder.Services.AddProblemDetails();
-
-		//	builder.Services.AddDbContextPool<MyDb1Context>(options =>
-		//options.UseMySql(builder.Configuration.GetConnectionString("mysqldb"), new MySqlServerVersion(new Version()), sqlOptions =>
-		//{
-		//	sqlOptions.MigrationsAssembly("Codele.MigrationService");
-		//	// Workaround for https://github.com/dotnet/aspire/issues/1023
-		//	sqlOptions.ExecutionStrategy(c => new RetryingSqlServerRetryingExecutionStrategy(c));
-		//}));
-		//	builder.EnrichMySqlDbContext<MyDb1Context>(settings =>
-		//		// Disable Aspire default retries as we're using a custom execution strategy
-		//		settings.DisableRetry = true);
-
 
 		builder.Services.AddProblemDetails();
 		builder.Services.AddEndpointsApiExplorer();
@@ -40,29 +29,18 @@ internal class Program
 
 		var summaries = new[]
 		{
-	"Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+			"Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
+		};
+
 		string[] words = [];
 
-		app.MapGet("/sample-data", async (MySqlConnection db) =>
+		app.MapGet("/sample-data", async(SqlConnection db) =>
 		{
-			using var command = db.CreateCommand();
-			command.CommandText = "SELECT Id, word FROM words";
-			using var reader = await command.ExecuteReaderAsync();
-			while (await reader.ReadAsync())
-			{
-				words.Append(reader.GetString(1));
-			}
-			//const string sql = """
-   //             SELECT Id, word
-   //             FROM words
-   //             """;
-			//var connection = await db.OpenAsync();
-			//var answers = await db.QueryAsync<Words>(sql);
-			//foreach (var word in answers)
-			//{
-			//	words.Append(word.Answer);
-			//}
+			const string sql = """
+			            SELECT Id, word
+			            FROM words
+			            """;
+			var Answers = await db.QueryAsync<Words>(sql);
 
 			var answer = Enumerable.Range(1, 14).Select(index =>
 					new SampleData
@@ -105,21 +83,6 @@ internal class Program
 
 		app.MapDefaultEndpoints();
 
-		if (app.Environment.IsDevelopment())
-		{
-			using (var scope = app.Services.CreateScope())
-			{
-				var context = scope.ServiceProvider.GetRequiredService<MyDb1Context>();
-				context.Database.EnsureCreated();
-			}
-		} else
-		{
-			app.UseExceptionHandler("/Error", createScopeForErrors: true);
-			// The default HSTS value is 30 days.
-			// You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-			app.UseHsts();
-		}
-
 		app.Run();
 
 		if (app.Environment.IsDevelopment())
@@ -129,7 +92,8 @@ internal class Program
 				var context = scope.ServiceProvider.GetRequiredService<DataContext>();
 				context.Database.EnsureCreated();
 			}
-		} else
+		}
+		else
 		{
 			app.UseExceptionHandler("/Error", createScopeForErrors: true);
 			// The default HSTS value is 30 days.
@@ -141,7 +105,7 @@ internal class Program
 
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+	public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }
 
 record SampleData(string answer);
