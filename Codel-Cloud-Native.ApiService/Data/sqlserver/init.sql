@@ -7,13 +7,13 @@ BEGIN
 END;
 GO
 
-USE words;
+USE codele;
 GO
 
--- Create the Contacts table
-IF OBJECT_ID(N'words', N'U') IS NULL
+-- Create the Words table
+IF OBJECT_ID(N'Words', N'U') IS NULL
 BEGIN
-    CREATE TABLE Contacts
+    CREATE TABLE Words
     (
         Id        INT PRIMARY KEY IDENTITY(1,1) ,
         Answer VARCHAR(5) NOT NULL
@@ -21,10 +21,10 @@ BEGIN
 END;
 GO
 
--- Insert some sample data into the Contacts table
-IF (SELECT COUNT(*) FROM Contacts) = 0
+-- Insert some sample data into the Words table
+IF (SELECT COUNT(*) FROM Words) = 0
 BEGIN
-    INSERT INTO Contacts (FirstName, LastName, Email, Phone)
+    INSERT INTO Words (Answer)
     VALUES
         ('write'),
         ('cobol'), 

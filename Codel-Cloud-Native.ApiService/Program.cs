@@ -1,9 +1,9 @@
 using System.Net.Sockets;
 using System.Reflection.Metadata;
-using Aspire.Pomelo.EntityFrameworkCore.MySql;
-using MySqlConnector;
 using Microsoft.Data.SqlClient;
 using Dapper;
+
+namespace Codele.ApiService;
 
 internal class Program
 {
@@ -37,8 +37,8 @@ internal class Program
 		app.MapGet("/sample-data", async(SqlConnection db) =>
 		{
 			const string sql = """
-			            SELECT Id, word
-			            FROM words
+			            SELECT Id, Answer
+			            FROM Words
 			            """;
 			var Answers = await db.QueryAsync<Words>(sql);
 
@@ -84,22 +84,6 @@ internal class Program
 		app.MapDefaultEndpoints();
 
 		app.Run();
-
-		if (app.Environment.IsDevelopment())
-		{
-			using (var scope = app.Services.CreateScope())
-			{
-				var context = scope.ServiceProvider.GetRequiredService<DataContext>();
-				context.Database.EnsureCreated();
-			}
-		}
-		else
-		{
-			app.UseExceptionHandler("/Error", createScopeForErrors: true);
-			// The default HSTS value is 30 days.
-			// You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-			app.UseHsts();
-		}
 	}
 }
 
@@ -109,5 +93,7 @@ record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 }
 
 record SampleData(string answer);
+
+public record Words(int Id, string Answer);
 
 

@@ -2,35 +2,19 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
+	  <OutputType>Exe</OutputType>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <UserSecretsId>9e4bf2b8-0938-4b71-bf8d-fba39c53022e</UserSecretsId>
-	  <GenerateRuntimeConfigurationFiles>True</GenerateRuntimeConfigurationFiles>
   </PropertyGroup>
 
 	<ItemGroup>
-		<Compile Include="..\Shared\RetryingSqlServerRetryingExecutionStrategy.cs" Link="RetryingSqlServerRetryingExecutionStrategy.cs" />
-	</ItemGroup>
-
-	<ItemGroup>
     <ProjectReference Include="..\Codel-Cloud-Native.ServiceDefaults\Codel-Cloud-Native.ServiceDefaults.csproj" />
-    <ProjectReference Include="..\Codele.ApiModel\Codele.ApiModel.csproj" />
-    <ProjectReference Include="..\DBMigrations\DBMigrations.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Aspire.Microsoft.Data.SqlClient" Version="8.2.0" />
-    <PackageReference Include="Aspire.Microsoft.EntityFrameworkCore.SqlServer" Version="8.1.0" />
     <PackageReference Include="Aspire.MySqlConnector" Version="8.1.0" />
-    <PackageReference Include="Aspire.Pomelo.EntityFrameworkCore.MySql" Version="8.0.1" />
     <PackageReference Include="Dapper" Version="2.1.35" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.8" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.8">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		<PrivateAssets>none</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.2" />
   </ItemGroup>
 
 </Project>
