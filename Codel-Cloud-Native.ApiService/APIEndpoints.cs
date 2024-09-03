@@ -34,7 +34,7 @@ public static class ApiEndpoints
 	public static WebApplication CodeleGameApi(this WebApplication app)
 	{
 
-		string[] words = [];
+		string[] words = new string[14];
 
 		app.MapGet("/sample-data", async (SqlConnection db) =>
 		{
@@ -43,6 +43,12 @@ public static class ApiEndpoints
 			            FROM Words
 			            """;
 			var Answers = await db.QueryAsync<Words>(sql);
+			int count = 0;
+
+			foreach (var item in Answers)
+			{
+				words[count++] = item.Answer;
+			}
 
 			var answer = Enumerable.Range(1, Answers.Count()).Select(index =>
 					new SampleData
@@ -50,7 +56,8 @@ public static class ApiEndpoints
 						words[Random.Shared.Next(words.Length)]
 					))
 					.ToArray();
-			return answer;
+
+			return Answers;
 		});
 
 		return app;
