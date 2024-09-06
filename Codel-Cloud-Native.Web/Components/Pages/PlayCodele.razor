@@ -6,7 +6,7 @@
 @using CodeleLogic
 
 <h3>Play Codele</h3>
-<p>Guess the 5 letter, coding-related word in 5 tries or less!</p>
+<p>Guess the @maxLength letter, coding-related word in @maxAttempts tries or less!</p>
 
 <br>
 
@@ -30,8 +30,7 @@
                         }
                         else if (status.Item2 == LetterStatus.IncorrectPosition)
                         {
-                            <button type="button"
-                                class="btn btn-warning">@letter</button>
+                            <button type="button" class="btn btn-warning">@letter</button>
                         }
                         else
                         {
@@ -54,7 +53,7 @@
 <!-- display message if guess is not 5 characters long -->
 @if (displayGuessSizeMsg == true)
 {
-    <p style="color: rgb(197, 3, 3);">Guess must be 5 characters long</p>
+    <p style="color: rgb(197, 3, 3);">Guess must be @maxLength characters long</p>
 }
 
 <!-- modal popup to display the game outcome -->
@@ -94,6 +93,9 @@
 
     // # of tries the player has to guess the word
     public int attempts;
+
+    const int maxAttempts = 5;
+    const int maxLength = 5;
 
     // message to display in the modal popup depending on the game outcome
     private string? gameStatusMessage;
@@ -142,7 +144,7 @@
     private void SubmitGuess()
     {
         // check if guess is 5 characters long, display message if not
-        if (newGuess != null && newGuess.Length != 5) displayGuessSizeMsg = false;
+        if (newGuess != null && newGuess.Length != maxLength) displayGuessSizeMsg = false;
         else
         {
             displayGuessSizeMsg = false;
@@ -151,7 +153,7 @@
                 Guess guess = new Guess(newGuess);
 
                 // if the player still has attempts left, evaluate their guess, otherwise display loss message
-                if (attempts < 5)
+                if (attempts < maxAttempts)
                 {
                     guess.GetGuessStatuses(answer);
 
