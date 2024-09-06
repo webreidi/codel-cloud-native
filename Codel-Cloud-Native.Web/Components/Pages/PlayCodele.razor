@@ -144,7 +144,7 @@
     private void SubmitGuess()
     {
         // check if guess is 5 characters long, display message if not
-        if (newGuess != null && newGuess.Length != maxLength) displayGuessSizeMsg = false;
+        if (newGuess != null && newGuess.Length != maxLength) displayGuessSizeMsg = true;
         else
         {
             displayGuessSizeMsg = false;
