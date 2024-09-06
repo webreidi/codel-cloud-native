@@ -7,14 +7,14 @@ namespace Codele.ApiService;
 
 public static class ApiEndpoints
 {
-	
+
 	public static WebApplication WeatherForecastApi(this WebApplication app)
 	{
 		var summaries = new[]
 		{
 			"Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
 		};
-		
+
 		app.MapGet("/weatherforecast", () =>
 		{
 			var forecast = Enumerable.Range(1, 5).Select(index =>
@@ -36,7 +36,7 @@ public static class ApiEndpoints
 
 		string[] words = new string[14];
 
-		app.MapGet("/sample-data", async (SqlConnection db) =>
+		app.MapGet("/codele-words", async (SqlConnection db) =>
 		{
 			const string sql = """
 			            SELECT Id, Answer
@@ -64,11 +64,11 @@ public static class ApiEndpoints
 	}
 }
 
-	record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-	{
-		public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-	}
+record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
+{
+	public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+}
 
-	record SampleData(string answer);
+record SampleData(string answer);
 
-	public record Words(int Id, string Answer);
+public record Words(int Id, string Answer);

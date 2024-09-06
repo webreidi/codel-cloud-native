@@ -24,7 +24,7 @@
                 GuessStatus = new();
 
                 for (int i = 0; i < 5; i++)
-                { 
+                {
                     char letter = Word[i];
                     bool isDuplicateInAnswer = answer.Count(x => x == letter) > 1;
 
@@ -48,7 +48,8 @@
         /// </summary>
         public bool IsWinningGuess(string answer)
         {
-            if (!string.IsNullOrEmpty(Word)) {
+            if (!string.IsNullOrEmpty(Word))
+            {
                 if (Word.Equals(answer)) return true;
                 return false;
             }

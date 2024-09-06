@@ -6,7 +6,7 @@
 @using CodeleLogic
 
 <h3>Play Codele</h3>
-<p>Guess the 5 letter, coding-related word in 5 tries or less!</p> 
+<p>Guess the 5 letter, coding-related word in 5 tries or less!</p>
 
 <br>
 
@@ -19,12 +19,24 @@
         List<(char, LetterStatus)>? statuses = guess.GuessStatus;
         <tr>
             <div class="btn-group" role="group" aria-label="Basic example">
-                @if (statuses != null) {
-                    foreach (var status in statuses) {
+                @if (statuses != null)
+                {
+                    foreach (var status in statuses)
+                    {
                         char letter = Char.ToUpper(status.Item1);
-                        if (status.Item2 == LetterStatus.Correct) {<button type="button" class="btn btn-success">@letter</button>}
-                        else if (status.Item2 == LetterStatus.IncorrectPosition) {<button type="button" class="btn btn-warning">@letter</button>}
-                        else {<button type="button" class="btn btn-secondary">@letter</button>}
+                        if (status.Item2 == LetterStatus.Correct)
+                        {
+                            <button type="button" class="btn btn-success">@letter</button>
+                        }
+                        else if (status.Item2 == LetterStatus.IncorrectPosition)
+                        {
+                            <button type="button"
+                                class="btn btn-warning">@letter</button>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-secondary">@letter</button>
+                        }
                     }
                 }
             </div>
@@ -40,14 +52,16 @@
 <button type="button" class="btn btn-primary" @onclick="SubmitGuess">Submit</button>
 
 <!-- display message if guess is not 5 characters long -->
-@if (displayGuessSizeMsg == true) {
+@if (displayGuessSizeMsg == true)
+{
     <p style="color: rgb(197, 3, 3);">Guess must be 5 characters long</p>
 }
 
 <!-- modal popup to display the game outcome -->
-@if (showModal == true) {
-    <div class="modal fade show" id="myModal" style="display:block; background-color: rgba(10,10,10,.8);"
-        aria-modal="true" role="dialog">
+@if (showModal == true)
+{
+    <div class="modal fade show" id="myModal" style="display:block; background-color: rgba(10,10,10,.8);" aria-modal="true"
+        role="dialog">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -73,10 +87,10 @@
     private string? newGuess;
 
     // list of potential game answers (pulled from a json file)
-    public SampleData[]? answers;
+    public CodeleWords[]? answers;
 
     // the answer for the current game
-    public string? answer {get; set;}
+    public string? answer { get; set; }
 
     // # of tries the player has to guess the word
     public int attempts;
@@ -105,7 +119,8 @@
 
     // use as Copilot example
     // Reset and start a new game
-    private void StartNewGame() {
+    private void StartNewGame()
+    {
         showModal = false;
         guesses.Clear();
         newGuess = string.Empty;
@@ -118,35 +133,42 @@
     }
 
     // Close the game status modal
-    private void ModalClose() {
+    private void ModalClose()
+    {
         showModal = false;
     }
-    
+
     // Submit and evaluate the player's guess
-    private void SubmitGuess() {
+    private void SubmitGuess()
+    {
         // check if guess is 5 characters long, display message if not
         if (newGuess != null && newGuess.Length != 5) displayGuessSizeMsg = false;
-        else {
+        else
+        {
             displayGuessSizeMsg = false;
-            if (!string.IsNullOrEmpty(newGuess)) 
+            if (!string.IsNullOrEmpty(newGuess))
             {
                 Guess guess = new Guess(newGuess);
 
                 // if the player still has attempts left, evaluate their guess, otherwise display loss message
-                if (attempts < 5) {
+                if (attempts < 5)
+                {
                     guess.GetGuessStatuses(answer);
 
                     // check if the player guessed correctly, display win message if true
-                    if (guess.IsWinningGuess(answer)) {
+                    if (guess.IsWinningGuess(answer))
+                    {
                         showModal = true;
                         gameStatusMessage = "You Won!";
                     }
                     // if the player did not guess correctly, increment the attempt #
-                    else {
+                    else
+                    {
                         attempts++;
                     }
                 }
-                else {
+                else
+                {
                     guess.GetGuessStatuses(answer);
 
                     showModal = true;
@@ -154,18 +176,16 @@
                 }
 
                 // add current guess to the player's list of guesses
-                guesses.Add(guess); 
+                guesses.Add(guess);
 
                 // clear the input box
-                newGuess = string.Empty; 
+                newGuess = string.Empty;
             }
         }
-    } 
+    }
 
     public void ShowAlert()
     {
         JSRuntime.InvokeVoidAsync("alert", "New game started!");
     }
 }
-
-

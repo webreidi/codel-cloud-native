@@ -2,11 +2,11 @@ namespace Codel_Cloud_Native.Web;
 
 public class CodeleApiClient(HttpClient httpClient)
 {
-    public async Task<SampleData[]> GetSampleDataAsync(int maxItems = 100, CancellationToken cancellationToken = default)
+    public async Task<CodeleWords[]> GetSampleDataAsync(int maxItems = 100, CancellationToken cancellationToken = default)
     {
-        List<SampleData> answers = null;
+        List<CodeleWords> answers = null;
 
-        await foreach (var answer in httpClient.GetFromJsonAsAsyncEnumerable<SampleData>("/sample-data", cancellationToken))
+        await foreach (var answer in httpClient.GetFromJsonAsAsyncEnumerable<CodeleWords>("/codele-words", cancellationToken))
         {
             if (answers?.Count >= maxItems)
             {
@@ -23,7 +23,7 @@ public class CodeleApiClient(HttpClient httpClient)
     }
 }
 
-public record SampleData(string answer)
+public record CodeleWords(string answer)
 {
     public string toString => answer;
 
