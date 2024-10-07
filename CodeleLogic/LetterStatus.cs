@@ -1,9 +1,1 @@
-﻿namespace CodeleLogic
-{
-    public enum LetterStatus
-    {
-        Correct,
-        IncorrectPosition,
-        Incorrect
-    }
-}
+﻿// Remove this file since LetterStatus is already defined in Guess.cs

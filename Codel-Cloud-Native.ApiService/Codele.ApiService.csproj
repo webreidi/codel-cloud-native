@@ -15,6 +15,9 @@
     <PackageReference Include="Aspire.Microsoft.Data.SqlClient" Version="8.2.0" />
     <PackageReference Include="Aspire.MySqlConnector" Version="8.1.0" />
     <PackageReference Include="Dapper" Version="2.1.35" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="System.Net.Http.Json" Version="8.0.0" />
   </ItemGroup>
 
 </Project>

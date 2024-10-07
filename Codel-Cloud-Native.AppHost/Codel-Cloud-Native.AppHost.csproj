@@ -19,6 +19,9 @@
     <PackageReference Include="Aspire.Hosting.Redis" Version="8.0.1" />
     <PackageReference Include="Aspire.Hosting.SqlServer" Version="8.2.0" />
     <PackageReference Include="Aspire.MySqlConnector" Version="8.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
   </ItemGroup>
 
 </Project>

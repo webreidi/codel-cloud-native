@@ -1,3 +1,7 @@
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
+using Codel_Cloud_Native.Web; // Ensure this matches your project namespace
+
 using Aspire.Hosting;
 //using Codele.ApiService;
 
