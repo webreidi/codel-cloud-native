@@ -10,11 +10,11 @@ namespace CodeleLogic
     public class Guess
     {
         public string? Word { get; set; }
-        public List<(char, LetterStatus)>? GuessStatus { get; private set; }
+        public List<(char, LetterStatus)>? GuessStatus;
 
         public Guess(string? word)
         {
-            Word = word;
+            this.Word = word;
         }
 
         /// <summary>
@@ -25,41 +25,53 @@ namespace CodeleLogic
             if (string.IsNullOrEmpty(Word))
                 return;
 
-            // Ensure the guess is exactly 5 characters long
+            // Add this check to ensure the guess is exactly 5 characters long
             if (Word.Length != 5)
             {
                 Console.WriteLine("Error: The guess must be exactly 5 characters long.");
                 return;
             }
 
+            // Count letters in the answer
+            var letterCount = new Dictionary<char, int>();
+            foreach (var letter in answer)
+            {
+                if (letterCount.ContainsKey(letter))
+                    letterCount[letter]++;
+                else
+                    letterCount[letter] = 1;
+            }
+
             GuessStatus = new List<(char, LetterStatus)>();
 
-            for (int i = 0; i < 5; i++)
+            // First pass to check for Correct guesses
+            for (int i = 0; i < Word.Length; i++)
             {
                 char letter = Word[i];
-                bool isDuplicateInAnswer = answer.Count(x => x == letter) > 1;
 
-                // Check for duplicate letters
-                if ((GuessStatus?.Contains((letter, LetterStatus.Correct)) ?? false) || 
-                    (GuessStatus?.Contains((letter, LetterStatus.IncorrectPosition)) ?? false) && 
-                    isDuplicateInAnswer)
+                // Check if the letter is correct
+                if (Word[i] == answer[i])
                 {
-                    GuessStatus.Add((letter, LetterStatus.Incorrect));
+                    GuessStatus.Add((letter, LetterStatus.Correct));
+                    // Decrement the count in the letterCount dictionary
+                    letterCount[letter]--;
                 }
                 else
                 {
-                    if (Word[i] == answer[i])
-                    {
-                        GuessStatus.Add((letter, LetterStatus.Correct));
-                    }
-                    else if (answer.Contains(letter))
-                    {
-                        GuessStatus.Add((letter, LetterStatus.IncorrectPosition));
-                    }
-                    else
-                    {
-                        GuessStatus.Add((letter, LetterStatus.Incorrect));
-                    }
+                    GuessStatus.Add((letter, LetterStatus.Incorrect)); // Default to Incorrect
+                }
+            }
+
+            // Second pass to check for IncorrectPosition
+            for (int i = 0; i < Word.Length; i++)
+            {
+                char letter = Word[i];
+
+                // Check for IncorrectPosition only if not already marked as Correct
+                if (GuessStatus[i].Item2 != LetterStatus.Correct && letterCount.ContainsKey(letter) && letterCount[letter] > 0)
+                {
+                    GuessStatus[i] = (letter, LetterStatus.IncorrectPosition);
+                    letterCount[letter]--;
                 }
             }
         }
@@ -69,7 +81,11 @@ namespace CodeleLogic
         /// </summary>
         public bool IsWinningGuess(string answer)
         {
-            return !string.IsNullOrEmpty(Word) && Word.Equals(answer, StringComparison.OrdinalIgnoreCase);
+            if (!string.IsNullOrEmpty(Word))
+            {
+                return Word.Equals(answer, StringComparison.OrdinalIgnoreCase);
+            }
+            return false;
         }
     }
 
