@@ -6,4 +6,4 @@ To run this application:
 2. ensure you have Docker running
 3. set the start-up project to be the AppHost project.
   
-This will launch all the needed projects and launch the .NET Aspire dashboard.
+This will launch all the needed projects and launch the [.NET Aspire dashboard](https://learn.microsoft.com/dotnet/aspire/get-started/aspire-overview).
