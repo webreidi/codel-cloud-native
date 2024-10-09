@@ -155,10 +155,10 @@
                 // if the player still has attempts left, evaluate their guess, otherwise display loss message
                 if (attempts <= maxAttempts)
                 {
-                    guess.GetGuessStatuses(answer);
+                    guess.GetGuessStatuses(answer!);
 
                     // check if the player guessed correctly, display win message if true
-                    if (guess.IsWinningGuess(answer))
+                    if (guess.IsWinningGuess(answer!))
                     {
                         showModal = true;
                         gameStatusMessage = "You Won!";
@@ -171,7 +171,7 @@
                 }
                 else
                 {
-                    guess.GetGuessStatuses(answer);
+                    guess.GetGuessStatuses(answer!);
 
                     showModal = true;
                     gameStatusMessage = "You Lost!";

@@ -25,6 +25,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\..\Directory.Packages.props = ..\..\Directory.Packages.props
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrontEnd.Tests", "FrontEnd.Tests\FrontEnd.Tests.csproj", "{BA072003-C7B6-4442-B35E-E596BEF7CEFA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,10 @@ Global
 		{F07290DD-AE82-4697-BB04-F9B267C71B43}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F07290DD-AE82-4697-BB04-F9B267C71B43}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F07290DD-AE82-4697-BB04-F9B267C71B43}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA072003-C7B6-4442-B35E-E596BEF7CEFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA072003-C7B6-4442-B35E-E596BEF7CEFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA072003-C7B6-4442-B35E-E596BEF7CEFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA072003-C7B6-4442-B35E-E596BEF7CEFA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

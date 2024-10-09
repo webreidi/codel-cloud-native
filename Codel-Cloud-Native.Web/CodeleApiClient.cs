@@ -4,7 +4,7 @@ public class CodeleApiClient(HttpClient httpClient)
 {
     public async Task<CodeleWords[]> GetSampleDataAsync(int maxItems = 100, CancellationToken cancellationToken = default)
     {
-        List<CodeleWords> answers = null;
+        List<CodeleWords>? answers = null;
 
         await foreach (var answer in httpClient.GetFromJsonAsAsyncEnumerable<CodeleWords>("/codele-words", cancellationToken))
         {
