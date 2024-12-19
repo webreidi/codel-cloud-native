@@ -78,7 +78,7 @@ public class PlayCodeleTests : BunitTestContext
         cut.Find("button").Click();
 
         var pTags = cut.FindAll("p");
-        Console.WriteLine(pTags);
+
         pTags[2].MarkupMatches(@"<p style=""color: rgb(197, 3, 3);"">Guess must be 5 characters long</p>");
     }
 
@@ -115,5 +115,25 @@ public class PlayCodeleTests : BunitTestContext
         submitButton.Click();
 
         cut.Find("h4").MarkupMatches(@"<h4 class=""modal-title"">You Lost!</h4>");
+    }
+
+    [TestMethod]
+    public void DuplicateLetterTest()
+    {
+        // Register the CodeleApiClient service
+        Services.AddSingleton<CodeleApiClient>();
+        var mock = Services.AddMockHttpClient();
+        CodeleWords[] answers = new CodeleWords[2] { new CodeleWords("hello"), new CodeleWords("world") };
+        mock.When("CodeleApi").RespondJson(answers);
+        var cut = RenderComponent<PlayCodele>(parameters => parameters.Add(p => p.answers, answers).Add(p => p.answer, "world"));
+
+        cut.Find("input").Change("hello");
+
+        cut.Find("button").Click();
+
+        var buttonTags = cut.FindAll("button");
+
+        buttonTags[2].MarkupMatches(@"<button type=""button"" class=""btn btn-secondary"">L</button>");
+
     }
 }
