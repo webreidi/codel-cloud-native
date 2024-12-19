@@ -86,9 +86,11 @@
     private string? newGuess;
 
     // list of potential game answers (pulled from a json file)
-    public CodeleWords[]? answers;
+    [Parameter]
+    public CodeleWords[]? answers { get; set; }
 
     // the answer for the current game
+    [Parameter]
     public string? answer { get; set; }
 
     // # of tries the player has to guess the word

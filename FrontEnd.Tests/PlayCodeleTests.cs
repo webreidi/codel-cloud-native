@@ -14,6 +14,9 @@ public class PlayCodeleTests : BunitTestContext
     [TestMethod]
     public void AttemptsStartAtOne()
     {
+        // Register the CodeleApiClient service
+        Services.AddSingleton<CodeleApiClient>();
+
         var mock = Services.AddMockHttpClient();
         mock.When("CodeleApi").RespondJson(new string[2] { "hello", "world" });
         var cut = RenderComponent<PlayCodele>();
@@ -24,6 +27,9 @@ public class PlayCodeleTests : BunitTestContext
     [TestMethod]
     public void SubmittingWrongGuess()
     {
+        // Register the CodeleApiClient service
+        Services.AddSingleton<CodeleApiClient>();
+
         var mock = Services.AddMockHttpClient();
         CodeleWords[] answers = new CodeleWords[2] { new CodeleWords("hello"), new CodeleWords("world") };
         mock.When("CodeleApi").RespondJson(answers);
@@ -39,6 +45,9 @@ public class PlayCodeleTests : BunitTestContext
     [TestMethod]
     public void SubmittingCorrectGuess()
     {
+        // Register the CodeleApiClient service
+        Services.AddSingleton<CodeleApiClient>();
+
         var mock = Services.AddMockHttpClient();
         CodeleWords[] answers = new CodeleWords[2] { new CodeleWords("hello"), new CodeleWords("world") };
         mock.When("CodeleApi").RespondJson(answers);
@@ -54,16 +63,22 @@ public class PlayCodeleTests : BunitTestContext
     [TestMethod]
     public void GuessIsNotFiveLetters()
     {
+        // Register the CodeleApiClient service
+        Services.AddSingleton<CodeleApiClient>();
+
         var mock = Services.AddMockHttpClient();
-        CodeleWords[] answers = new CodeleWords[2] { new CodeleWords("hello"), new CodeleWords("world") };
+        CodeleWords[] answers = [new CodeleWords("hello"), new CodeleWords("world")];
         mock.When("CodeleApi").RespondJson(answers);
-        var cut = RenderComponent<PlayCodele>(parameters => parameters.Add(p => p.answers, answers).Add(p => p.answer, "hello"));
+        var cut = RenderComponent<PlayCodele>(parameters => parameters
+            .Add(p => p.answers, answers) // Ensure the property name matches the component's property
+            .Add(p => p.answer, "hello")); // Ensure the property name matches the component's property
 
         cut.Find("input").Change("worlds");
 
         cut.Find("button").Click();
 
         var pTags = cut.FindAll("p");
+        Console.WriteLine(pTags);
         pTags[2].MarkupMatches(@"<p style=""color: rgb(197, 3, 3);"">Guess must be 5 characters long</p>");
     }
 }

@@ -24,7 +24,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="bunit" Version="1.23.9" />
+		<PackageReference Include="bunit" Version="1.37.7" />
 		<PackageReference Include="RichardSzalay.MockHttp" Version="6.0.0" />
 	</ItemGroup>
 
