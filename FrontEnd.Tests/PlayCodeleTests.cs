@@ -81,4 +81,39 @@ public class PlayCodeleTests : BunitTestContext
         Console.WriteLine(pTags);
         pTags[2].MarkupMatches(@"<p style=""color: rgb(197, 3, 3);"">Guess must be 5 characters long</p>");
     }
+
+    [TestMethod]
+    public void SubmittingWrongGuesses()
+    {
+        // Register the CodeleApiClient service
+        Services.AddSingleton<CodeleApiClient>();
+
+        var mock = Services.AddMockHttpClient();
+        CodeleWords[] answers = new CodeleWords[2] { new CodeleWords("hello"), new CodeleWords("world") };
+        mock.When("CodeleApi").RespondJson(answers);
+        var cut = RenderComponent<PlayCodele>(parameters => parameters.Add(p => p.answers, answers).Add(p => p.answer, "world"));
+
+        cut.Find("input").Change("hello");
+
+        cut.Find("button").Click();
+
+        cut.Find("input").Change("hello");
+
+        var submitButton = cut.Find("[name='SubmitButton']");
+        submitButton.Click();
+
+        cut.Find("input").Change("hello");
+
+        submitButton.Click();
+
+        cut.Find("input").Change("hello");
+
+        submitButton.Click();
+
+        cut.Find("input").Change("hello");
+
+        submitButton.Click();
+
+        cut.Find("h4").MarkupMatches(@"<h4 class=""modal-title"">You Lost!</h4>");
+    }
 }
