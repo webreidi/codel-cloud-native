@@ -20,7 +20,7 @@
    dotnet --version  # Should show 9.0.x
    ```
 
-3. **Install Aspire workload** (takes ~2-3 minutes, NEVER CANCEL):
+**Install Aspire templates**
    ```bash
    dotnet workload install aspire
    ```
