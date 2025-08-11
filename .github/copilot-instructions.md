@@ -27,7 +27,7 @@ dotnet new install Aspire.ProjectTemplates::9.4.0 --force
 
 4. **Verify Aspire installation**:
    ```bash
-   dotnet workload list  # Should show 'aspire' in the list
+   dotnet new list aspire # Should show 'aspire' in the list
    ```
 
 ### Build and Test Process
