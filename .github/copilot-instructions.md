@@ -22,7 +22,7 @@
 
 **Install Aspire templates**
    ```bash
-   dotnet workload install aspire
+dotnet new install Aspire.ProjectTemplates::9.4.0 --force
    ```
 
 4. **Verify Aspire installation**:
