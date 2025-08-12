@@ -53,6 +53,10 @@ public class WeatherApiClient(HttpClient httpClient)
         catch
         {
             // Return null if this city fails, continue with others
+        catch (Exception ex)
+        {
+            // Return null if this city fails, continue with others
+            Debug.WriteLine($"Error fetching weather for {city}: {ex}");
         }
 
         return null;
