@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using System.Diagnostics;
 
 namespace Codel_Cloud_Native.Web;
 
@@ -26,8 +27,9 @@ public class WeatherApiClient(HttpClient httpClient)
 
             return forecasts.ToArray();
         }
-        catch
+        catch (Exception ex)
         {
+            Console.WriteLine($"Error in GetWeatherAsync: {ex}");
             // Fallback to mock data if API fails
             return GetMockWeatherData(maxItems);
         }
@@ -49,9 +51,7 @@ public class WeatherApiClient(HttpClient httpClient)
                 );
             }
         }
-        catch
-        {
-            // Return null if this city fails, continue with others
+        // Return null if this city fails, continue with others
         catch (Exception ex)
         {
             // Return null if this city fails, continue with others
