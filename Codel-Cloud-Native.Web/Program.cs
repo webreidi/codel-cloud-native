@@ -1,5 +1,8 @@
 using Codel_Cloud_Native.Web;
 using Codel_Cloud_Native.Web.Components;
+using Polly;
+using Polly.Retry;
+using System.Net.Http;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +14,13 @@ builder.AddRedisOutputCache("cache");
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+// Add a simple retry policy for outgoing HTTP calls
+builder.Services.AddHttpClient("policies");
+var retryPolicy = Policy<HttpResponseMessage>
+    .Handle<HttpRequestException>()
+    .OrResult(msg => (int)msg.StatusCode >= 500)
+    .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromMilliseconds(200 * Math.Pow(2, retryAttempt)));
+
 builder.Services.AddHttpClient<WeatherApiClient>(client =>
     {
         // This URL uses "https+http://" to indicate HTTPS is preferred over HTTP.
@@ -21,7 +31,8 @@ builder.Services.AddHttpClient<WeatherApiClient>(client =>
 builder.Services.AddHttpClient<CodeleApiClient>(client =>
     {
         client.BaseAddress = new("https+http://apiservice");
-    });
+    })
+    .AddPolicyHandler(retryPolicy);
 
 var app = builder.Build();
 

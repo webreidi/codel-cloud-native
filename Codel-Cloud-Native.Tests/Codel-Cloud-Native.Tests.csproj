@@ -25,6 +25,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Codel-Cloud-Native.AppHost\Codel-Cloud-Native.AppHost.csproj" />
     <ProjectReference Include="..\CodeleLogic\CodeleLogic.csproj" />
+  <ProjectReference Include="..\Codel-Cloud-Native.Web\Codel-Cloud-Native.Web.csproj" />
   </ItemGroup>
 
   <ItemGroup>

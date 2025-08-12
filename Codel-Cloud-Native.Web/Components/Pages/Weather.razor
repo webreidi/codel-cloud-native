@@ -6,9 +6,19 @@
 
 <PageTitle>Weather</PageTitle>
 
-<h1>Weather</h1>
+<h1>Current Weather</h1>
 
-<p>This component demonstrates showing data loaded from a backend API service.</p>
+<p>This component shows current weather data from major cities around the world using OpenWeatherMap API.</p>
+
+<div class="mb-3">
+    <button class="btn btn-primary" @onclick="RefreshWeather" disabled="@isLoading">
+        @if (isLoading)
+        {
+            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+        }
+        Refresh Weather
+    </button>
+</div>
 
 @if (forecasts == null)
 {
@@ -22,7 +32,7 @@ else
                 <th>Date</th>
                 <th>Temp. (C)</th>
                 <th>Temp. (F)</th>
-                <th>Summary</th>
+                <th>Location & Conditions</th>
             </tr>
         </thead>
         <tbody>
@@ -41,9 +51,31 @@ else
 
 @code {
     private WeatherForecast[]? forecasts;
+    private bool isLoading = false;
 
     protected override async Task OnInitializedAsync()
     {
-        forecasts = await WeatherApi.GetWeatherAsync();
+        await LoadWeatherData();
+    }
+
+    private async Task RefreshWeather()
+    {
+        await LoadWeatherData();
+    }
+
+    private async Task LoadWeatherData()
+    {
+        isLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            forecasts = await WeatherApi.GetWeatherAsync();
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
     }
 }
