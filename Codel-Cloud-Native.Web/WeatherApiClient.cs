@@ -4,7 +4,6 @@ namespace Codel_Cloud_Native.Web;
 
 public class WeatherApiClient(HttpClient httpClient)
 {
-    private const string ApiKey = "demo"; // Using demo mode - replace with actual API key for production
     private static readonly string ApiKey = Environment.GetEnvironmentVariable("WEATHER_API_KEY") ?? "demo"; // Using demo mode - set WEATHER_API_KEY for production
     private const string BaseUrl = "https://api.openweathermap.org/data/2.5";
 
