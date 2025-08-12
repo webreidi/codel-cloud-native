@@ -23,12 +23,14 @@
 
                 GuessStatus = new();
 
-                for (int i = 0; i < 5; i++)
+                // iterate over the overlapping length of the guess and answer to avoid index exceptions
+                var length = Math.Min(Word.Length, answer.Length);
+                for (int i = 0; i < length; i++)
                 {
                     char letter = Word[i];
                     bool isDuplicateInAnswer = answer.Count(x => x == letter) > 1;
 
-                    //Check for duplicate letters
+                    // Check for duplicate letters
                     if ((GuessStatus.Contains((letter, LetterStatus.Correct)) || GuessStatus.Contains((letter, LetterStatus.IncorrectPosition))) && !isDuplicateInAnswer)
                     {
                         GuessStatus.Add((letter, LetterStatus.Incorrect));
@@ -38,6 +40,15 @@
                         if (Word[i] == answer[i]) GuessStatus.Add((letter, LetterStatus.Correct));
                         else if (answer.Contains(letter)) GuessStatus.Add((letter, LetterStatus.IncorrectPosition));
                         else GuessStatus.Add((letter, LetterStatus.Incorrect));
+                    }
+                }
+
+                // If guess is longer than answer, mark remaining letters as incorrect
+                if (Word.Length > answer.Length)
+                {
+                    for (int i = length; i < Word.Length; i++)
+                    {
+                        GuessStatus.Add((Word[i], LetterStatus.Incorrect));
                     }
                 }
             }

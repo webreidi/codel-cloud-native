@@ -149,4 +149,18 @@ public class UnitTests
         // Assert
         Assert.False(guess.IsWinningGuess(answer));
     }
+
+    [Fact]
+    public void TestIsGuessWrongLength()
+    {
+        // Arrange
+        var guess = new Guess("app");
+        string answer = "apple";
+
+        // Act
+        guess.GetGuessStatuses(answer);
+
+        // Assert
+        Assert.False(guess.IsWinningGuess(answer));
+    }
 }
