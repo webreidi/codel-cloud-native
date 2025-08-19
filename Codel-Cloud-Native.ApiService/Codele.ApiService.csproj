@@ -9,6 +9,7 @@
 
 	<ItemGroup>
     <ProjectReference Include="..\Codel-Cloud-Native.ServiceDefaults\Codel-Cloud-Native.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\CodeleLogic\CodeleLogic.csproj" />
   </ItemGroup>
 
   <ItemGroup>
