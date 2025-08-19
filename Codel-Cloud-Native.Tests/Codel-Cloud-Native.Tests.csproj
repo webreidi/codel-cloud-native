@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.Testing" Version="9.4.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.0" />
     <PackageReference Include="coverlet.collector" Version="6.0.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -25,7 +26,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Codel-Cloud-Native.AppHost\Codel-Cloud-Native.AppHost.csproj" />
     <ProjectReference Include="..\CodeleLogic\CodeleLogic.csproj" />
-  <ProjectReference Include="..\Codel-Cloud-Native.Web\Codel-Cloud-Native.Web.csproj" />
+    <ProjectReference Include="..\Codel-Cloud-Native.Web\Codel-Cloud-Native.Web.csproj" />
+    <ProjectReference Include="..\Codel-Cloud-Native.ApiService\Codele.ApiService.csproj" />
   </ItemGroup>
 
   <ItemGroup>

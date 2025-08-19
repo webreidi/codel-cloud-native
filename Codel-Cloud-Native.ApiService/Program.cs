@@ -97,6 +97,9 @@ app.MapDefaultEndpoints();
 
 app.Run();
 
+// Make Program class accessible for testing
+public partial class Program { }
+
 
 
 
