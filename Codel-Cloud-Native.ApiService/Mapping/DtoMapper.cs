@@ -32,6 +32,7 @@ public static class DtoMapper
     {
         return new GameSessionDto(
             gameSession.GameId,
+            gameSession.IsComplete ? gameSession.TargetWord : null,
             gameSession.Attempts.Count,
             gameSession.MaxAttempts,
             gameSession.IsComplete,

@@ -23,6 +23,7 @@ public record GuessResultDto(
 /// </summary>
 public record GameSessionDto(
     Guid GameId,
+    string? TargetWord,
     int Attempts,
     int MaxAttempts,
     bool IsComplete,

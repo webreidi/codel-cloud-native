@@ -47,7 +47,8 @@
 <!-- input box for the player to type and submit a guess -->
 <input placeholder="Type your guess" @bind="newGuess" disabled="@(currentGame?.IsComplete == true)" />
 
-<button type="button" class="btn btn-primary" @onclick="SubmitGuess" disabled="@(currentGame?.IsComplete == true)">Submit</button>
+<button type="button" class="btn btn-primary" @onclick="SubmitGuess"
+    disabled="@(currentGame?.IsComplete == true)">Submit</button>
 
 <!-- display message if guess is not 5 characters long -->
 @if (displayGuessSizeMsg == true)
@@ -73,6 +74,10 @@
                     else
                     {
                         <p>Better luck next time!</p>
+                        @if (!string.IsNullOrEmpty(currentGame?.TargetWord))
+                        {
+                            <p><strong>The correct word was:</strong> @currentGame!.TargetWord</p>
+                        }
                     }
                 </div>
                 <div class="modal-footer">
@@ -119,7 +124,7 @@
         showModal = false;
         newGuess = string.Empty;
         displayGuessSizeMsg = false;
-        
+
         try
         {
             var gameResponse = await CodeleApi.CreateGameAsync();
@@ -160,7 +165,7 @@
                 try
                 {
                     currentGame = await CodeleApi.SubmitGuessAsync(currentGame.GameId, newGuess);
-                    
+
                     // Check game status
                     if (currentGame.IsComplete)
                     {
