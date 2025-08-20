@@ -10,6 +10,35 @@
 
 <br>
 
+<!-- Letter Tracker -->
+@if (currentGame?.GuessedLetters != null && currentGame.GuessedLetters.Count > 0)
+{
+    <div class="letter-tracker mb-3">
+        <h5>Letters Guessed:</h5>
+        <div class="btn-group" role="group" aria-label="Letter tracker">
+            @foreach (char letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+            {
+                @if (currentGame.GuessedLetters.ContainsKey(letter))
+                {
+                    var status = currentGame.GuessedLetters[letter];
+                    var cssClass = status switch
+                    {
+                        "Correct" => "btn btn-success",
+                        "IncorrectPosition" => "btn btn-warning",
+                        "Incorrect" => "btn btn-secondary",
+                        _ => "btn btn-outline-dark"
+                    };
+                    <button type="button" class="@cssClass" disabled="true">@letter</button>
+                }
+                else
+                {
+                    <button type="button" class="btn btn-outline-dark" disabled="true">@letter</button>
+                }
+            }
+        </div>
+    </div>
+}
+
 <p><strong>Attempt #: @attempts</strong></p>
 
 <!-- display the player's guesses -->

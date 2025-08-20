@@ -28,7 +28,8 @@ public record GameSessionDto(
     int MaxAttempts,
     bool IsComplete,
     bool IsWin,
-    IReadOnlyList<GuessResultDto> Guesses
+    IReadOnlyList<GuessResultDto> Guesses,
+    IReadOnlyDictionary<char, string> GuessedLetters // Key: letter, Value: status string
 );
 
 /// <summary>
