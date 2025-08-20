@@ -37,7 +37,8 @@ public static class DtoMapper
             gameSession.MaxAttempts,
             gameSession.IsComplete,
             gameSession.IsWin,
-            gameSession.Attempts.Select(a => a.ToDto()).ToList().AsReadOnly()
+            gameSession.Attempts.Select(a => a.ToDto()).ToList().AsReadOnly(),
+            gameSession.GuessedLetters.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToString()).AsReadOnly()
         );
     }
 
