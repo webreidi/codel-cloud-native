@@ -1,6 +1,4 @@
 using Codele.ApiService;
-using CodeleLogic.Interfaces;
-using CodeleLogic.Services;
 using Microsoft.Data.SqlClient;
 using StackExchange.Redis;
 using System.Text.Json;
@@ -17,11 +15,6 @@ builder.Services.AddProblemDetails();
 // Health checks (liveness & readiness)
 builder.Services.AddHealthChecks();
 builder.Services.AddEndpointsApiExplorer();
-
-// Register domain services
-builder.Services.AddSingleton<IWordProvider, InMemoryWordProvider>();
-builder.Services.AddSingleton<IGuessEvaluator, DefaultGuessEvaluator>();
-builder.Services.AddSingleton<IGameService, DefaultGameService>();
 
 // If Redis is configured, register a ConnectionMultiplexer for use in readiness checks
 var redisConn = builder.Configuration.GetSection("Redis").GetValue<string>("ConnectionString");
@@ -96,9 +89,6 @@ app.MapGet("/readyz", async (IServiceProvider services) =>
 app.MapDefaultEndpoints();
 
 app.Run();
-
-// Make Program class accessible for testing
-public partial class Program { }
 
 
 

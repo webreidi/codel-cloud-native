@@ -3,7 +3,7 @@
 @inject IJSRuntime JSRuntime
 @rendermode InteractiveServer
 
-@using Codel_Cloud_Native.Web.DTOs
+@using CodeleLogic
 
 <h3>Play Codele</h3>
 <p>Guess the @maxLength letter, coding-related word in @maxAttempts tries or less!</p>
@@ -14,41 +14,41 @@
 
 <!-- display the player's guesses -->
 <table>
-    @if (currentGame?.Guesses != null)
+    @foreach (var guess in guesses)
     {
-        @foreach (var guess in currentGame.Guesses)
-        {
-            <tr>
-                <div class="btn-group" role="group" aria-label="Basic example">
-                    @foreach (var letter in guess.Letters)
+        List<(char, LetterStatus)>? statuses = guess.GuessStatus;
+        <tr>
+            <div class="btn-group" role="group" aria-label="Basic example">
+                @if (statuses != null)
+                {
+                    foreach (var status in statuses)
                     {
-                        char letterChar = Char.ToUpper(letter.Letter);
-                        if (letter.Status == "Correct")
+                        char letter = Char.ToUpper(status.Item1);
+                        if (status.Item2 == LetterStatus.Correct)
                         {
-                            <button type="button" class="btn btn-success">@letterChar</button>
+                            <button type="button" class="btn btn-success">@letter</button>
                         }
-                        else if (letter.Status == "IncorrectPosition")
+                        else if (status.Item2 == LetterStatus.IncorrectPosition)
                         {
-                            <button type="button" class="btn btn-warning">@letterChar</button>
+                            <button type="button" class="btn btn-warning">@letter</button>
                         }
                         else
                         {
-                            <button type="button" class="btn btn-secondary">@letterChar</button>
+                            <button type="button" class="btn btn-secondary">@letter</button>
                         }
                     }
-                </div>
-            </tr>
-            <br>
-        }
+                }
+            </div>
+        </tr>
+        <br>
     }
 </table>
 <br>
 
 <!-- input box for the player to type and submit a guess -->
-<input placeholder="Type your guess" @bind="newGuess" disabled="@(currentGame?.IsComplete == true)" />
+<input placeholder="Type your guess" @bind="newGuess" />
 
-<button type="button" class="btn btn-primary" @onclick="SubmitGuess"
-    disabled="@(currentGame?.IsComplete == true)">Submit</button>
+<button type="button" class="btn btn-primary" @onclick="SubmitGuess">Submit</button>
 
 <!-- display message if guess is not 5 characters long -->
 @if (displayGuessSizeMsg == true)
@@ -67,18 +67,7 @@
                     <h4 class="modal-title">@gameStatusMessage</h4>
                 </div>
                 <div class="modal-body">
-                    @if (currentGame?.IsWin == true)
-                    {
-                        <p><strong>You guessed it: </strong>@(currentGame.Guesses.LastOrDefault()?.Word ?? "Unknown")</p>
-                    }
-                    else
-                    {
-                        <p>Better luck next time!</p>
-                        @if (!string.IsNullOrEmpty(currentGame?.TargetWord))
-                        {
-                            <p><strong>The correct word was:</strong> @currentGame!.TargetWord</p>
-                        }
-                    }
+                    <p><strong>Correct Answer: </strong> @answer</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success" @onclick="StartNewGame">New Game?</button>
@@ -90,16 +79,21 @@
 
 @code {
 
-    // Current game session
-    private GameSessionDto? currentGame;
+    // list of guesses the player has made so far
+    private List<Guess> guesses = new();
 
     // the player's current guess
     private string? newGuess;
 
-    // # of tries the player has to guess the word
-    public int attempts => currentGame?.Attempts ?? 0;
+    // list of potential game answers (pulled from a json file)
+    public CodeleWords[]? answers;
+
+    // the answer for the current game
+    public string? answer { get; set; }
 
     // # of tries the player has to guess the word
+    public int attempts;
+
     const int maxAttempts = 5;
     const int maxLength = 5;
 
@@ -115,25 +109,28 @@
     // On load, set up the game
     protected override async Task OnInitializedAsync()
     {
-        await StartNewGame();
+        showModal = false;
+        attempts = 1;
+        answers = await CodeleApi.GetSampleDataAsync();
+        Random randomGenerator = new Random();
+        if (answers != null)
+        {
+            answer = answers.ElementAt(randomGenerator.Next(0, answers.Length)).toString;
+        }
     }
 
+    // use as Copilot example
     // Reset and start a new game
-    private async Task StartNewGame()
+    private void StartNewGame()
     {
         showModal = false;
+        guesses.Clear();
         newGuess = string.Empty;
-        displayGuessSizeMsg = false;
-
-        try
+        attempts = 1;
+        Random randomGenerator = new Random();
+        if (answers != null)
         {
-            var gameResponse = await CodeleApi.CreateGameAsync();
-            currentGame = await CodeleApi.GetGameAsync(gameResponse.GameId);
-        }
-        catch (Exception ex)
-        {
-            // Handle error - could show user-friendly message
-            Console.WriteLine($"Error starting new game: {ex.Message}");
+            answer = answers.ElementAt(randomGenerator.Next(0, answers.Length)).toString;
         }
     }
 
@@ -144,14 +141,8 @@
     }
 
     // Submit and evaluate the player's guess
-    private async Task SubmitGuess()
+    private void SubmitGuess()
     {
-        if (currentGame == null)
-        {
-            await StartNewGame();
-            return;
-        }
-
         // check if guess is 5 characters long, display message if not
         if (newGuess != null && newGuess.Length != maxLength)
         {
@@ -162,25 +153,38 @@
             displayGuessSizeMsg = false;
             if (!string.IsNullOrEmpty(newGuess))
             {
-                try
-                {
-                    currentGame = await CodeleApi.SubmitGuessAsync(currentGame.GameId, newGuess);
+                Guess guess = new Guess(newGuess);
 
-                    // Check game status
-                    if (currentGame.IsComplete)
+                // if the player still has attempts left, evaluate their guess, otherwise display loss message
+                if (attempts < maxAttempts)
+                {
+                    guess.GetGuessStatuses(answer!);
+
+                    // check if the player guessed correctly, display win message if true
+                    if (guess.IsWinningGuess(answer!))
                     {
                         showModal = true;
-                        gameStatusMessage = currentGame.IsWin ? "You Won!" : "You Lost!";
+                        gameStatusMessage = "You Won!";
                     }
-
-                    // clear the input box
-                    newGuess = string.Empty;
+                    // if the player did not guess correctly, increment the attempt #
+                    else
+                    {
+                        attempts++;
+                    }
                 }
-                catch (Exception ex)
+                else
                 {
-                    // Handle error - could show user-friendly message
-                    Console.WriteLine($"Error submitting guess: {ex.Message}");
+                    guess.GetGuessStatuses(answer!);
+
+                    showModal = true;
+                    gameStatusMessage = "You Lost!";
                 }
+
+                // add current guess to the player's list of guesses
+                guesses.Add(guess);
+
+                // clear the input box
+                newGuess = string.Empty;
             }
         }
     }
