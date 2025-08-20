@@ -8,6 +8,37 @@ To run this application:
   
 This will launch all the needed projects and launch the [.NET Aspire dashboard](https://learn.microsoft.com/dotnet/aspire/get-started/aspire-overview).
 
+## Architecture Overview
+
+### Domain Layer (`CodeleLogic`)
+The game logic is now cleanly separated into domain services with clear interfaces:
+
+- **`IWordProvider`**: Provides target words for games (current implementation uses in-memory coding-related words)
+- **`IGuessEvaluator`**: Evaluates guesses against target words using the existing Wordle logic
+- **`GameSession`**: Represents a game session with attempts, completion status, and win state
+- **`IGameService`**: Orchestrates game creation and guess submission
+
+This architecture enables:
+- Easy testing of game logic in isolation
+- Future extensibility for variants (hard mode, timed games)
+- Simple service replacement via dependency injection
+- Clear separation between game rules and UI/API concerns
+
+### API Layer (`Codel-Cloud-Native.ApiService`)
+Clean REST endpoints that return only DTOs:
+
+- `POST /api/games` - Create a new game session
+- `GET /api/games/{gameId}` - Get current game state
+- `POST /api/games/{gameId}/guesses` - Submit a guess
+
+All endpoints return structured DTOs (`GameSessionDto`, `GuessResultDto`, `LetterResultDto`) with proper HTTP status codes and error handling.
+
+### Blazor Client (`Codel-Cloud-Native.Web`)
+The UI layer now:
+- Uses only DTOs from the API (no direct domain model dependencies)
+- Implements async game operations with error handling
+- Maintains the same user experience while being decoupled from game logic
+
 ## Quick Wins
 
 This branch includes a few small improvements for developer experience and observability:
