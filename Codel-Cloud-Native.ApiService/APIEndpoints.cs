@@ -2,6 +2,8 @@
 using System.Reflection.Metadata;
 using Microsoft.Data.SqlClient;
 using Dapper;
+using CodeleLogic.Services;
+using Codele.ApiService.DTOs;
 
 namespace Codele.ApiService;
 
@@ -33,31 +35,86 @@ public static class ApiEndpoints
 
 	public static WebApplication CodeleGameApi(this WebApplication app)
 	{
-
-		string[] words = new string[14];
-
-		app.MapGet("/codele-words", async (SqlConnection db) =>
+		// Get available words from database
+		app.MapGet("/codele-words", async (IWordProvider wordProvider) =>
 		{
-			const string sql = """
-			            SELECT Id, Answer
-			            FROM Words
-			            """;
-			var Answers = await db.QueryAsync<Words>(sql);
-			int count = 0;
+			var words = await wordProvider.GetAllWordsAsync();
+			return words.Select(w => w.ToDto()).ToArray();
+		});
 
-			foreach (var item in Answers)
+		// Create a new game session
+		app.MapPost("/game/create", async (IGameService gameService, CreateGameSessionRequest? request) =>
+		{
+			try
 			{
-				words[count++] = item.Answer;
+				var gameSession = await gameService.CreateGameSessionAsync();
+				var dto = gameSession.ToDto();
+				
+				// Remove target word from response for security
+				return Results.Ok(dto);
 			}
+			catch (Exception ex)
+			{
+				return Results.Problem($"Failed to create game session: {ex.Message}");
+			}
+		});
 
-			var answer = Enumerable.Range(1, Answers.Count()).Select(index =>
-					new SampleData
-					(
-						words[Random.Shared.Next(words.Length)]
-					))
-					.ToArray();
+		// Submit a guess
+		app.MapPost("/game/guess", async (IGameService gameService, SubmitGuessRequest request) =>
+		{
+			try
+			{
+				if (string.IsNullOrWhiteSpace(request.GameId))
+					return Results.BadRequest("GameId is required");
 
-			return Answers;
+				if (string.IsNullOrWhiteSpace(request.Guess))
+					return Results.BadRequest("Guess is required");
+
+				var gameSession = await gameService.GetGameSessionAsync(request.GameId);
+				if (gameSession == null)
+					return Results.NotFound("Game session not found");
+
+				if (gameSession.IsComplete)
+					return Results.Conflict("Game is already complete");
+
+				var guessResult = gameService.ApplyGuess(gameSession, request.Guess);
+				var gameSessionDto = gameSession.ToDto();
+
+				return Results.Ok(new { 
+					GameSession = gameSessionDto, 
+					GuessResult = guessResult.ToDto() 
+				});
+			}
+			catch (ArgumentException ex)
+			{
+				return Results.BadRequest(ex.Message);
+			}
+			catch (InvalidOperationException ex)
+			{
+				return Results.Conflict(ex.Message);
+			}
+			catch (Exception ex)
+			{
+				return Results.Problem($"Failed to process guess: {ex.Message}");
+			}
+		});
+
+		// Get game session state
+		app.MapGet("/game/{gameId}", async (IGameService gameService, string gameId) =>
+		{
+			try
+			{
+				var gameSession = await gameService.GetGameSessionAsync(gameId);
+				if (gameSession == null)
+					return Results.NotFound("Game session not found");
+
+				var dto = gameSession.ToDto();
+				return Results.Ok(dto);
+			}
+			catch (Exception ex)
+			{
+				return Results.Problem($"Failed to get game session: {ex.Message}");
+			}
 		});
 
 		return app;

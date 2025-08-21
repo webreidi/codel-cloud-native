@@ -8,6 +8,44 @@ To run this application:
   
 This will launch all the needed projects and launch the [.NET Aspire dashboard](https://learn.microsoft.com/dotnet/aspire/get-started/aspire-overview).
 
+## Domain Architecture
+
+The application follows clean architecture principles with explicit domain services and DTO boundaries:
+
+### Domain Layer (`CodeleLogic` project)
+- **IWordProvider**: Provides target words from database or in-memory sources
+  - `DatabaseWordProvider`: Fetches words from SQL Server database
+  - `InMemoryWordProvider`: Fallback provider for testing/development
+- **IGuessEvaluator**: Pure function for evaluating guesses against target words
+  - `GuessEvaluator`: Implements Wordle logic for letter status evaluation
+- **IGameService**: Orchestrates game sessions and high-level operations
+  - `GameService`: Manages session lifecycle and guess processing
+- **Domain Models**:
+  - `GameSession`: Aggregate containing game state, attempts, and completion status
+  - `GuessResult` & `LetterResult`: Value objects for guess evaluation results
+
+### API Layer (`Codel-Cloud-Native.ApiService`)
+- **Clean DTOs**: All public endpoints return DTOs, no domain object leakage
+  - `GameSessionDto`: Game state for API responses
+  - `GuessResultDto` & `LetterResultDto`: Guess evaluation results
+- **RESTful Endpoints**:
+  - `GET /codele-words`: Get available words from database
+  - `POST /game/create`: Create new game session
+  - `POST /game/guess`: Submit guess with validation
+  - `GET /game/{gameId}`: Get current game state
+- **Error Handling**: Proper HTTP status codes and ProblemDetails responses
+
+### Presentation Layer (`Codel-Cloud-Native.Web`)
+- **Typed API Client**: `CodeleApiClient` consumes DTOs only
+- **Clean Component State**: `PlayCodele.razor` works with DTOs, no direct domain dependencies
+- **Error Handling**: Graceful handling of API failures with user feedback
+
+This architecture enables:
+- Easy testing of isolated business logic
+- Future rule variants without UI/API changes
+- Clear API evolution without breaking contracts
+- Database-backed word list with fallback options
+
 ## Quick Wins
 
 This branch includes a few small improvements for developer experience and observability:
