@@ -18,11 +18,15 @@ builder.Services.AddHealthChecks();
 builder.Services.AddEndpointsApiExplorer();
 
 // Register domain services
-builder.Services.AddScoped<IGuessEvaluator, GuessEvaluator>();
-builder.Services.AddScoped<IGameService, GameService>();
+// GameService stores in-memory game sessions and must be a singleton so sessions persist
+// across multiple HTTP requests. GuessEvaluator and IWordProvider are stateless and
+// safe to register as singletons here as well.
+builder.Services.AddSingleton<IGuessEvaluator, GuessEvaluator>();
+builder.Services.AddSingleton<IGameService, GameService>();
 
-// Register word provider with database connection
-builder.Services.AddScoped<IWordProvider>(serviceProvider =>
+// Register word provider with database connection as a singleton so it can be used
+// by the singleton GameService without lifetime conflicts.
+builder.Services.AddSingleton<IWordProvider>(serviceProvider =>
 {
     var connectionString = builder.Configuration.GetConnectionString("codele");
     if (string.IsNullOrEmpty(connectionString))
