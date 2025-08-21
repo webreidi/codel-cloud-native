@@ -2,6 +2,7 @@ using Codele.ApiService;
 using Microsoft.Data.SqlClient;
 using StackExchange.Redis;
 using System.Text.Json;
+using CodeleLogic.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,22 @@ builder.Services.AddProblemDetails();
 // Health checks (liveness & readiness)
 builder.Services.AddHealthChecks();
 builder.Services.AddEndpointsApiExplorer();
+
+// Register domain services
+builder.Services.AddScoped<IGuessEvaluator, GuessEvaluator>();
+builder.Services.AddScoped<IGameService, GameService>();
+
+// Register word provider with database connection
+builder.Services.AddScoped<IWordProvider>(serviceProvider =>
+{
+    var connectionString = builder.Configuration.GetConnectionString("codele");
+    if (string.IsNullOrEmpty(connectionString))
+    {
+        // Fallback to in-memory provider if no database connection
+        return new InMemoryWordProvider();
+    }
+    return new DatabaseWordProvider(connectionString);
+});
 
 // If Redis is configured, register a ConnectionMultiplexer for use in readiness checks
 var redisConn = builder.Configuration.GetSection("Redis").GetValue<string>("ConnectionString");
