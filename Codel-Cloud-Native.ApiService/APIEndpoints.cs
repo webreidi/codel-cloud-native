@@ -2,9 +2,8 @@
 using System.Reflection.Metadata;
 using Microsoft.Data.SqlClient;
 using Dapper;
-using CodeleLogic.Interfaces;
+using CodeleLogic.Services;
 using Codele.ApiService.DTOs;
-using Codele.ApiService.Mapping;
 
 namespace Codele.ApiService;
 
@@ -36,63 +35,59 @@ public static class ApiEndpoints
 
 	public static WebApplication CodeleGameApi(this WebApplication app)
 	{
-		// Legacy endpoint for backwards compatibility - still return words from database
-		app.MapGet("/codele-words", async (SqlConnection db) =>
+		// Get available words from database
+		app.MapGet("/codele-words", async (IWordProvider wordProvider) =>
 		{
-			const string sql = """
-			            SELECT Id, Answer
-			            FROM Words
-			            """;
-			var answers = await db.QueryAsync<Words>(sql);
-			return answers;
+			var words = await wordProvider.GetAllWordsAsync();
+			return words.Select(w => w.ToDto()).ToArray();
 		});
 
-		// New game API endpoints using domain services
-		app.MapPost("/api/games", async (IGameService gameService) =>
+		// Create a new game session
+		app.MapPost("/game/create", async (IGameService gameService, CreateGameSessionRequest? request) =>
 		{
 			try
 			{
 				var gameSession = await gameService.CreateGameSessionAsync();
-				return Results.Created($"/api/games/{gameSession.GameId}", gameSession.ToCreateResponseDto());
+				var dto = gameSession.ToDto();
+				
+				// Remove target word from response for security
+				return Results.Ok(dto);
 			}
 			catch (Exception ex)
 			{
-				return Results.Problem($"Failed to create game: {ex.Message}", statusCode: 500);
+				return Results.Problem($"Failed to create game session: {ex.Message}");
 			}
 		});
 
-		app.MapGet("/api/games/{gameId:guid}", async (Guid gameId, IGameService gameService) =>
+		// Submit a guess
+		app.MapPost("/game/guess", async (IGameService gameService, SubmitGuessRequest request) =>
 		{
 			try
 			{
-				var gameSession = await gameService.GetGameSessionAsync(gameId);
-				if (gameSession == null)
-				{
-					return Results.NotFound($"Game with ID {gameId} not found");
-				}
-				return Results.Ok(gameSession.ToDto());
-			}
-			catch (Exception ex)
-			{
-				return Results.Problem($"Failed to get game: {ex.Message}", statusCode: 500);
-			}
-		});
+				if (string.IsNullOrWhiteSpace(request.GameId))
+					return Results.BadRequest("GameId is required");
 
-		app.MapPost("/api/games/{gameId:guid}/guesses", async (Guid gameId, SubmitGuessRequestDto request, IGameService gameService) =>
-		{
-			try
-			{
 				if (string.IsNullOrWhiteSpace(request.Guess))
-				{
-					return Results.BadRequest("Guess cannot be empty");
-				}
+					return Results.BadRequest("Guess is required");
 
-				var gameSession = await gameService.SubmitGuessAsync(gameId, request.Guess);
-				return Results.Ok(gameSession.ToDto());
+				var gameSession = await gameService.GetGameSessionAsync(request.GameId);
+				if (gameSession == null)
+					return Results.NotFound("Game session not found");
+
+				if (gameSession.IsComplete)
+					return Results.Conflict("Game is already complete");
+
+				var guessResult = gameService.ApplyGuess(gameSession, request.Guess);
+				var gameSessionDto = gameSession.ToDto();
+
+				return Results.Ok(new { 
+					GameSession = gameSessionDto, 
+					GuessResult = guessResult.ToDto() 
+				});
 			}
 			catch (ArgumentException ex)
 			{
-				return Results.NotFound(ex.Message);
+				return Results.BadRequest(ex.Message);
 			}
 			catch (InvalidOperationException ex)
 			{
@@ -100,7 +95,25 @@ public static class ApiEndpoints
 			}
 			catch (Exception ex)
 			{
-				return Results.Problem($"Failed to submit guess: {ex.Message}", statusCode: 500);
+				return Results.Problem($"Failed to process guess: {ex.Message}");
+			}
+		});
+
+		// Get game session state
+		app.MapGet("/game/{gameId}", async (IGameService gameService, string gameId) =>
+		{
+			try
+			{
+				var gameSession = await gameService.GetGameSessionAsync(gameId);
+				if (gameSession == null)
+					return Results.NotFound("Game session not found");
+
+				var dto = gameSession.ToDto();
+				return Results.Ok(dto);
+			}
+			catch (Exception ex)
+			{
+				return Results.Problem($"Failed to get game session: {ex.Message}");
 			}
 		});
 

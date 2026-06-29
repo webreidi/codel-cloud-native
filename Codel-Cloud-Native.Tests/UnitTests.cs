@@ -170,12 +170,14 @@ public class UnitTests
     public void TestGameSession_TrackGuessedLetters_SingleGuess()
     {
         // Arrange
-        var gameSession = new GameSession(Guid.NewGuid(), "APPLE", 5);
-        var guessEvaluator = new DefaultGuessEvaluator();
+        var gameSession = new GameSession(Guid.NewGuid().ToString(), "APPLE", 5);
+        var guessEvaluator = new GuessEvaluator();
         
         // Act
-        var guessResult = guessEvaluator.EvaluateGuess("HELLO", "APPLE");
-        gameSession.AddGuess(guessResult);
+        var statuses = guessEvaluator.EvaluateGuess("HELLO", "APPLE");
+        var letters = statuses.Select((ls, index) => new LetterResult(ls.Letter, ls.Status, index)).ToList();
+        var guessResult = new GuessResult("HELLO", letters, guessEvaluator.IsWinningGuess("HELLO", "APPLE"));
+        gameSession.AddAttempt(guessResult);
         
         // Assert - HELLO vs APPLE:
         // H=Incorrect, E=IncorrectPosition (E is in position 4 in APPLE), L=IncorrectPosition (L is in position 2), L=Incorrect, O=Incorrect
@@ -191,16 +193,20 @@ public class UnitTests
     public void TestGameSession_TrackGuessedLetters_LetterStatusUpgrade()
     {
         // Arrange
-        var gameSession = new GameSession(Guid.NewGuid(), "APPLE", 5);
-        var guessEvaluator = new DefaultGuessEvaluator();
+        var gameSession = new GameSession(Guid.NewGuid().ToString(), "APPLE", 5);
+        var guessEvaluator = new GuessEvaluator();
         
         // Act - first guess: HELLO vs APPLE (L will be IncorrectPosition)
-        var guessResult1 = guessEvaluator.EvaluateGuess("HELLO", "APPLE");
-        gameSession.AddGuess(guessResult1);
+        var statuses1 = guessEvaluator.EvaluateGuess("HELLO", "APPLE");
+        var letters1 = statuses1.Select((ls, index) => new LetterResult(ls.Letter, ls.Status, index)).ToList();
+        var guessResult1 = new GuessResult("HELLO", letters1, guessEvaluator.IsWinningGuess("HELLO", "APPLE"));
+        gameSession.AddAttempt(guessResult1);
         
         // Act - second guess: APPLE vs APPLE (all letters correct, including L upgraded to Correct)
-        var guessResult2 = guessEvaluator.EvaluateGuess("APPLE", "APPLE");
-        gameSession.AddGuess(guessResult2);
+        var statuses2 = guessEvaluator.EvaluateGuess("APPLE", "APPLE");
+        var letters2 = statuses2.Select((ls, index) => new LetterResult(ls.Letter, ls.Status, index)).ToList();
+        var guessResult2 = new GuessResult("APPLE", letters2, guessEvaluator.IsWinningGuess("APPLE", "APPLE"));
+        gameSession.AddAttempt(guessResult2);
         
         // Assert - L should be upgraded from IncorrectPosition to Correct
         Assert.Equal(LetterStatus.Correct, gameSession.GuessedLetters['A']);
@@ -213,16 +219,20 @@ public class UnitTests
     public void TestGameSession_TrackGuessedLetters_NoDowngrade()
     {
         // Arrange
-        var gameSession = new GameSession(Guid.NewGuid(), "APPLE", 5);
-        var guessEvaluator = new DefaultGuessEvaluator();
+        var gameSession = new GameSession(Guid.NewGuid().ToString(), "APPLE", 5);
+        var guessEvaluator = new GuessEvaluator();
         
         // Act - first guess: A is correct in APPLE
-        var guessResult1 = guessEvaluator.EvaluateGuess("ALOFT", "APPLE");
-        gameSession.AddGuess(guessResult1);
+        var statuses1 = guessEvaluator.EvaluateGuess("ALOFT", "APPLE");
+        var letters1 = statuses1.Select((ls, index) => new LetterResult(ls.Letter, ls.Status, index)).ToList();
+        var guessResult1 = new GuessResult("ALOFT", letters1, guessEvaluator.IsWinningGuess("ALOFT", "APPLE"));
+        gameSession.AddAttempt(guessResult1);
         
         // Act - second guess: A would be incorrect position if it appeared elsewhere, but shouldn't downgrade
-        var guessResult2 = guessEvaluator.EvaluateGuess("BEAUT", "APPLE");  // A is not in APPLE at position 2
-        gameSession.AddGuess(guessResult2);
+        var statuses2 = guessEvaluator.EvaluateGuess("BEAUT", "APPLE");  // A is not in APPLE at position 2
+        var letters2 = statuses2.Select((ls, index) => new LetterResult(ls.Letter, ls.Status, index)).ToList();
+        var guessResult2 = new GuessResult("BEAUT", letters2, guessEvaluator.IsWinningGuess("BEAUT", "APPLE"));
+        gameSession.AddAttempt(guessResult2);
         
         // Assert - A should remain Correct from first guess
         Assert.Equal(LetterStatus.Correct, gameSession.GuessedLetters['A']);

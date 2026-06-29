@@ -8,36 +8,43 @@ To run this application:
   
 This will launch all the needed projects and launch the [.NET Aspire dashboard](https://learn.microsoft.com/dotnet/aspire/get-started/aspire-overview).
 
-## Architecture Overview
+## Domain Architecture
 
-### Domain Layer (`CodeleLogic`)
-The game logic is now cleanly separated into domain services with clear interfaces:
+The application follows clean architecture principles with explicit domain services and DTO boundaries:
 
-- **`IWordProvider`**: Provides target words for games (current implementation uses in-memory coding-related words)
-- **`IGuessEvaluator`**: Evaluates guesses against target words using the existing Wordle logic
-- **`GameSession`**: Represents a game session with attempts, completion status, and win state
-- **`IGameService`**: Orchestrates game creation and guess submission
-
-This architecture enables:
-- Easy testing of game logic in isolation
-- Future extensibility for variants (hard mode, timed games)
-- Simple service replacement via dependency injection
-- Clear separation between game rules and UI/API concerns
+### Domain Layer (`CodeleLogic` project)
+- **IWordProvider**: Provides target words from database or in-memory sources
+  - `DatabaseWordProvider`: Fetches words from SQL Server database
+  - `InMemoryWordProvider`: Fallback provider for testing/development
+- **IGuessEvaluator**: Pure function for evaluating guesses against target words
+  - `GuessEvaluator`: Implements Wordle logic for letter status evaluation
+- **IGameService**: Orchestrates game sessions and high-level operations
+  - `GameService`: Manages session lifecycle and guess processing
+- **Domain Models**:
+  - `GameSession`: Aggregate containing game state, attempts, and completion status
+  - `GuessResult` & `LetterResult`: Value objects for guess evaluation results
 
 ### API Layer (`Codel-Cloud-Native.ApiService`)
-Clean REST endpoints that return only DTOs:
+- **Clean DTOs**: All public endpoints return DTOs, no domain object leakage
+  - `GameSessionDto`: Game state for API responses
+  - `GuessResultDto` & `LetterResultDto`: Guess evaluation results
+- **RESTful Endpoints**:
+  - `GET /codele-words`: Get available words from database
+  - `POST /game/create`: Create new game session
+  - `POST /game/guess`: Submit guess with validation
+  - `GET /game/{gameId}`: Get current game state
+- **Error Handling**: Proper HTTP status codes and ProblemDetails responses
 
-- `POST /api/games` - Create a new game session
-- `GET /api/games/{gameId}` - Get current game state
-- `POST /api/games/{gameId}/guesses` - Submit a guess
+### Presentation Layer (`Codel-Cloud-Native.Web`)
+- **Typed API Client**: `CodeleApiClient` consumes DTOs only
+- **Clean Component State**: `PlayCodele.razor` works with DTOs, no direct domain dependencies
+- **Error Handling**: Graceful handling of API failures with user feedback
 
-All endpoints return structured DTOs (`GameSessionDto`, `GuessResultDto`, `LetterResultDto`) with proper HTTP status codes and error handling.
-
-### Blazor Client (`Codel-Cloud-Native.Web`)
-The UI layer now:
-- Uses only DTOs from the API (no direct domain model dependencies)
-- Implements async game operations with error handling
-- Maintains the same user experience while being decoupled from game logic
+This architecture enables:
+- Easy testing of isolated business logic
+- Future rule variants without UI/API changes
+- Clear API evolution without breaking contracts
+- Database-backed word list with fallback options
 
 ## Quick Wins
 

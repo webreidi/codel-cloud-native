@@ -1,9 +1,8 @@
 using Codele.ApiService;
-using CodeleLogic.Interfaces;
-using CodeleLogic.Services;
 using Microsoft.Data.SqlClient;
 using StackExchange.Redis;
 using System.Text.Json;
+using CodeleLogic.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,9 +18,24 @@ builder.Services.AddHealthChecks();
 builder.Services.AddEndpointsApiExplorer();
 
 // Register domain services
-builder.Services.AddSingleton<IWordProvider, InMemoryWordProvider>();
-builder.Services.AddSingleton<IGuessEvaluator, DefaultGuessEvaluator>();
-builder.Services.AddSingleton<IGameService, DefaultGameService>();
+// GameService stores in-memory game sessions and must be a singleton so sessions persist
+// across multiple HTTP requests. GuessEvaluator and IWordProvider are stateless and
+// safe to register as singletons here as well.
+builder.Services.AddSingleton<IGuessEvaluator, GuessEvaluator>();
+builder.Services.AddSingleton<IGameService, GameService>();
+
+// Register word provider with database connection as a singleton so it can be used
+// by the singleton GameService without lifetime conflicts.
+builder.Services.AddSingleton<IWordProvider>(serviceProvider =>
+{
+    var connectionString = builder.Configuration.GetConnectionString("codele");
+    if (string.IsNullOrEmpty(connectionString))
+    {
+        // Fallback to in-memory provider if no database connection
+        return new InMemoryWordProvider();
+    }
+    return new DatabaseWordProvider(connectionString);
+});
 
 // If Redis is configured, register a ConnectionMultiplexer for use in readiness checks
 var redisConn = builder.Configuration.GetSection("Redis").GetValue<string>("ConnectionString");
@@ -96,9 +110,6 @@ app.MapGet("/readyz", async (IServiceProvider services) =>
 app.MapDefaultEndpoints();
 
 app.Run();
-
-// Make Program class accessible for testing
-public partial class Program { }
 
 
 

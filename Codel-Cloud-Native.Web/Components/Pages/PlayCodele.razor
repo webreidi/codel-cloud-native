@@ -3,67 +3,57 @@
 @inject IJSRuntime JSRuntime
 @rendermode InteractiveServer
 
-@using Codel_Cloud_Native.Web.DTOs
-
 <h3>Play Codele</h3>
 <p>Guess the @maxLength letter, coding-related word in @maxAttempts tries or less!</p>
 
 <br>
 
-<!-- Letter Tracker -->
-@if (currentGame?.GuessedLetters != null && currentGame.GuessedLetters.Count > 0)
+@if (gameSession != null)
 {
-    <div class="letter-tracker mb-3">
-        <h5>Letters Guessed:</h5>
-        <div class="btn-group" role="group" aria-label="Letter tracker">
-            @foreach (char letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-            {
-                @if (currentGame.GuessedLetters.ContainsKey(letter))
+    @if (gameSession.GuessedLetters != null && gameSession.GuessedLetters.Count > 0)
+    {
+        <div class="letter-tracker mb-3">
+            <h5>Letters Guessed:</h5>
+            <div class="btn-group" role="group" aria-label="Letter tracker">
+                @foreach (char letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
                 {
-                    var status = currentGame.GuessedLetters[letter];
-                    var cssClass = status switch
+                    @if (gameSession.GuessedLetters.ContainsKey(letter))
                     {
-                        "Correct" => "btn btn-success",
-                        "IncorrectPosition" => "btn btn-warning",
-                        "Incorrect" => "btn btn-secondary",
-                        _ => "btn btn-outline-dark"
-                    };
-                    <button type="button" class="@cssClass" disabled="true">@letter</button>
+                        var status = gameSession.GuessedLetters[letter];
+                        var cssClass = status switch
+                        {
+                            "Correct" => "btn btn-success",
+                            "IncorrectPosition" => "btn btn-warning",
+                            "Incorrect" => "btn btn-secondary",
+                            _ => "btn btn-outline-dark"
+                        };
+                        <button type="button" class="@cssClass" disabled="true">@letter</button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-outline-dark" disabled="true">@letter</button>
+                    }
                 }
-                else
-                {
-                    <button type="button" class="btn btn-outline-dark" disabled="true">@letter</button>
-                }
-            }
+            </div>
         </div>
-    </div>
-}
+    }
 
-<p><strong>Attempt #: @attempts</strong></p>
+    <p><strong>Attempt #: @(gameSession.Attempts + 1)</strong></p>
+}
 
 <!-- display the player's guesses -->
 <table>
-    @if (currentGame?.Guesses != null)
+    @if (gameSession?.GuessHistory != null)
     {
-        @foreach (var guess in currentGame.Guesses)
+        @foreach (var guessResult in gameSession.GuessHistory)
         {
             <tr>
                 <div class="btn-group" role="group" aria-label="Basic example">
-                    @foreach (var letter in guess.Letters)
+                    @foreach (var letterResult in guessResult.Letters)
                     {
-                        char letterChar = Char.ToUpper(letter.Letter);
-                        if (letter.Status == "Correct")
-                        {
-                            <button type="button" class="btn btn-success">@letterChar</button>
-                        }
-                        else if (letter.Status == "IncorrectPosition")
-                        {
-                            <button type="button" class="btn btn-warning">@letterChar</button>
-                        }
-                        else
-                        {
-                            <button type="button" class="btn btn-secondary">@letterChar</button>
-                        }
+                        char letter = Char.ToUpper(letterResult.Letter);
+                        string buttonClass = GetButtonClass(letterResult.Status);
+                        <button type="button" class="btn @buttonClass">@letter</button>
                     }
                 </div>
             </tr>
@@ -74,10 +64,9 @@
 <br>
 
 <!-- input box for the player to type and submit a guess -->
-<input placeholder="Type your guess" @bind="newGuess" disabled="@(currentGame?.IsComplete == true)" />
+<input placeholder="Type your guess" @bind="newGuess" />
 
-<button type="button" class="btn btn-primary" @onclick="SubmitGuess"
-    disabled="@(currentGame?.IsComplete == true)">Submit</button>
+<button type="button" class="btn btn-primary" @onclick="SubmitGuess" disabled="@(gameSession?.IsComplete ?? false)">Submit</button>
 
 <!-- display message if guess is not 5 characters long -->
 @if (displayGuessSizeMsg == true)
@@ -85,8 +74,14 @@
     <p style="color: rgb(197, 3, 3);">Guess must be @maxLength characters long</p>
 }
 
+<!-- display error messages -->
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <p style="color: rgb(197, 3, 3);">@errorMessage</p>
+}
+
 <!-- modal popup to display the game outcome -->
-@if (showModal == true)
+@if (showModal == true && gameSession != null)
 {
     <div class="modal fade show" id="myModal" style="display:block; background-color: rgba(10,10,10,.8);" aria-modal="true"
         role="dialog">
@@ -96,18 +91,7 @@
                     <h4 class="modal-title">@gameStatusMessage</h4>
                 </div>
                 <div class="modal-body">
-                    @if (currentGame?.IsWin == true)
-                    {
-                        <p><strong>You guessed it: </strong>@(currentGame.Guesses.LastOrDefault()?.Word ?? "Unknown")</p>
-                    }
-                    else
-                    {
-                        <p>Better luck next time!</p>
-                        @if (!string.IsNullOrEmpty(currentGame?.TargetWord))
-                        {
-                            <p><strong>The correct word was:</strong> @currentGame!.TargetWord</p>
-                        }
-                    }
+                    <p><strong>Total Attempts: </strong>@gameSession.Attempts / @gameSession.MaxAttempts</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success" @onclick="StartNewGame">New Game?</button>
@@ -118,17 +102,15 @@
 }
 
 @code {
-
-    // Current game session
-    private GameSessionDto? currentGame;
+    // Current game session from API
+    private GameSessionDto? gameSession;
 
     // the player's current guess
     private string? newGuess;
 
-    // # of tries the player has to guess the word
-    public int attempts => currentGame?.Attempts ?? 0;
+    // list of potential game answers (pulled from API)
+    public CodeleWords[]? answers;
 
-    // # of tries the player has to guess the word
     const int maxAttempts = 5;
     const int maxLength = 5;
 
@@ -141,28 +123,42 @@
     // display message if guess is not 5 characters long
     private bool displayGuessSizeMsg { get; set; }
 
+    // error message for API errors
+    private string? errorMessage;
+
     // On load, set up the game
     protected override async Task OnInitializedAsync()
     {
-        await StartNewGame();
+        try
+        {
+            showModal = false;
+            answers = await CodeleApi.GetSampleDataAsync();
+            await StartNewGame();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to initialize game: {ex.Message}";
+        }
     }
 
     // Reset and start a new game
     private async Task StartNewGame()
     {
-        showModal = false;
-        newGuess = string.Empty;
-        displayGuessSizeMsg = false;
-
         try
         {
-            var gameResponse = await CodeleApi.CreateGameAsync();
-            currentGame = await CodeleApi.GetGameAsync(gameResponse.GameId);
+            showModal = false;
+            errorMessage = null;
+            displayGuessSizeMsg = false;
+            newGuess = string.Empty;
+            
+            gameSession = await CodeleApi.CreateGameSessionAsync();
+            
+            // Refresh the UI
+            StateHasChanged();
         }
         catch (Exception ex)
         {
-            // Handle error - could show user-friendly message
-            Console.WriteLine($"Error starting new game: {ex.Message}");
+            errorMessage = $"Failed to start new game: {ex.Message}";
         }
     }
 
@@ -175,43 +171,63 @@
     // Submit and evaluate the player's guess
     private async Task SubmitGuess()
     {
-        if (currentGame == null)
-        {
-            await StartNewGame();
-            return;
-        }
-
-        // check if guess is 5 characters long, display message if not
-        if (newGuess != null && newGuess.Length != maxLength)
-        {
-            displayGuessSizeMsg = true;
-        }
-        else
+        try
         {
             displayGuessSizeMsg = false;
-            if (!string.IsNullOrEmpty(newGuess))
+            errorMessage = null;
+
+            // check if guess is 5 characters long, display message if not
+            if (newGuess != null && newGuess.Length != maxLength)
             {
-                try
-                {
-                    currentGame = await CodeleApi.SubmitGuessAsync(currentGame.GameId, newGuess);
-
-                    // Check game status
-                    if (currentGame.IsComplete)
-                    {
-                        showModal = true;
-                        gameStatusMessage = currentGame.IsWin ? "You Won!" : "You Lost!";
-                    }
-
-                    // clear the input box
-                    newGuess = string.Empty;
-                }
-                catch (Exception ex)
-                {
-                    // Handle error - could show user-friendly message
-                    Console.WriteLine($"Error submitting guess: {ex.Message}");
-                }
+                displayGuessSizeMsg = true;
+                return;
             }
+
+            if (string.IsNullOrWhiteSpace(newGuess) || gameSession == null)
+            {
+                return;
+            }
+
+            if (gameSession.IsComplete)
+            {
+                errorMessage = "Game is already complete. Start a new game.";
+                return;
+            }
+
+            // Submit guess to API
+            var response = await CodeleApi.SubmitGuessAsync(gameSession.GameId, newGuess);
+            
+            // Update game session with latest state
+            gameSession = response.GameSession;
+
+            // Check if game is complete
+            if (gameSession.IsComplete)
+            {
+                showModal = true;
+                gameStatusMessage = gameSession.IsWin ? "You Won!" : "You Lost!";
+            }
+
+            // clear the input box
+            newGuess = string.Empty;
+            
+            // Refresh the UI
+            StateHasChanged();
         }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to submit guess: {ex.Message}";
+        }
+    }
+
+    private string GetButtonClass(string status)
+    {
+        return status switch
+        {
+            "Correct" => "btn-success",
+            "IncorrectPosition" => "btn-warning",
+            "Incorrect" => "btn-secondary",
+            _ => "btn-secondary"
+        };
     }
 
     public void ShowAlert()
