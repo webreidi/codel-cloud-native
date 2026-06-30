@@ -111,6 +111,26 @@ public class UnitTests
     }
 
     [Fact]
+    public void TestGetGuessStatuses_DuplicateLetter_WithOneExactMatchAndOneExtraGuessLetter_ScoresCorrectly()
+    {
+        // Arrange
+        var guess = new Guess("floor");
+        string answer = "razor";
+
+        // Act
+        guess.GetGuessStatuses(answer);
+
+        // Assert
+        Assert.NotNull(guess.GuessStatus);
+        Assert.Equal(5, guess.GuessStatus.Count);
+        Assert.Equal(LetterStatus.Incorrect, guess.GuessStatus[0].Item2); // f
+        Assert.Equal(LetterStatus.Incorrect, guess.GuessStatus[1].Item2); // l
+        Assert.Equal(LetterStatus.Incorrect, guess.GuessStatus[2].Item2); // o (extra)
+        Assert.Equal(LetterStatus.Correct, guess.GuessStatus[3].Item2);   // o (exact)
+        Assert.Equal(LetterStatus.Correct, guess.GuessStatus[4].Item2);   // r (exact)
+    }
+
+    [Fact]
     public void TestIsWinningGuess()
     {
         // Arrange

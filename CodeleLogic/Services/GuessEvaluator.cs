@@ -10,30 +10,50 @@ public class GuessEvaluator : IGuessEvaluator
         if (string.IsNullOrEmpty(guess) || string.IsNullOrEmpty(targetWord))
             return Enumerable.Empty<(char, LetterStatus)>();
 
-        var results = new List<(char, LetterStatus)>();
-        
-        // Use the existing logic from Guess.cs with improvements
         var length = Math.Min(guess.Length, targetWord.Length);
-        
+        var statuses = new LetterStatus[length];
+        var isExactMatch = new bool[length];
+        var unmatchedTargetLetterCounts = new Dictionary<char, int>();
+
+        // First pass: mark exact-position matches and count the remaining target letters.
         for (int i = 0; i < length; i++)
         {
-            char letter = guess[i];
-            bool isDuplicateInAnswer = targetWord.Count(x => x == letter) > 1;
+            if (guess[i] == targetWord[i])
+            {
+                isExactMatch[i] = true;
+                statuses[i] = LetterStatus.Correct;
+            }
+            else
+            {
+                var targetLetter = targetWord[i];
+                unmatchedTargetLetterCounts[targetLetter] = unmatchedTargetLetterCounts.GetValueOrDefault(targetLetter) + 1;
+            }
+        }
 
-            // Check for duplicate letters - use existing logic
-            if ((results.Contains((letter, LetterStatus.Correct)) || results.Contains((letter, LetterStatus.IncorrectPosition))) && !isDuplicateInAnswer)
+        // Second pass: only assign IncorrectPosition if an unmatched target letter is still available.
+        for (int i = 0; i < length; i++)
+        {
+            if (isExactMatch[i])
             {
-                results.Add((letter, LetterStatus.Incorrect));
+                continue;
             }
-            else // regular Wordle logic
+
+            var guessLetter = guess[i];
+            if (unmatchedTargetLetterCounts.TryGetValue(guessLetter, out var count) && count > 0)
             {
-                if (guess[i] == targetWord[i]) 
-                    results.Add((letter, LetterStatus.Correct));
-                else if (targetWord.Contains(letter)) 
-                    results.Add((letter, LetterStatus.IncorrectPosition));
-                else 
-                    results.Add((letter, LetterStatus.Incorrect));
+                statuses[i] = LetterStatus.IncorrectPosition;
+                unmatchedTargetLetterCounts[guessLetter] = count - 1;
             }
+            else
+            {
+                statuses[i] = LetterStatus.Incorrect;
+            }
+        }
+
+        var results = new List<(char, LetterStatus)>(length);
+        for (int i = 0; i < length; i++)
+        {
+            results.Add((guess[i], statuses[i]));
         }
 
         // If guess is longer than answer, mark remaining letters as incorrect
