@@ -64,7 +64,7 @@
 <br>
 
 <!-- input box for the player to type and submit a guess -->
-<input placeholder="Type your guess" @bind="newGuess" />
+<input placeholder="Type your guess" @bind="newGuess" @ref="guessInput" autofocus />
 
 <button type="button" class="btn btn-primary" @onclick="SubmitGuess" disabled="@(gameSession?.IsComplete ?? false)">Submit</button>
 
@@ -111,6 +111,9 @@
     // list of potential game answers (pulled from API)
     public CodeleWords[]? answers;
 
+    // input reference used to keep keyboard focus on the guess box
+    private ElementReference guessInput;
+
     const int maxAttempts = 5;
     const int maxLength = 5;
 
@@ -141,6 +144,14 @@
         }
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await FocusGuessInputAsync();
+        }
+    }
+
     // Reset and start a new game
     private async Task StartNewGame()
     {
@@ -155,6 +166,7 @@
             
             // Refresh the UI
             StateHasChanged();
+            await FocusGuessInputAsync();
         }
         catch (Exception ex)
         {
@@ -180,17 +192,20 @@
             if (newGuess != null && newGuess.Length != maxLength)
             {
                 displayGuessSizeMsg = true;
+                await FocusGuessInputAsync();
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(newGuess) || gameSession == null)
             {
+                await FocusGuessInputAsync();
                 return;
             }
 
             if (gameSession.IsComplete)
             {
                 errorMessage = "Game is already complete. Start a new game.";
+                await FocusGuessInputAsync();
                 return;
             }
 
@@ -212,10 +227,28 @@
             
             // Refresh the UI
             StateHasChanged();
+            await FocusGuessInputAsync();
         }
         catch (Exception ex)
         {
             errorMessage = $"Failed to submit guess: {ex.Message}";
+        }
+    }
+
+    private async Task FocusGuessInputAsync()
+    {
+        if (gameSession?.IsComplete ?? false)
+        {
+            return;
+        }
+
+        try
+        {
+            await guessInput.FocusAsync();
+        }
+        catch
+        {
+            // Input may not be available yet during early renders.
         }
     }
 
