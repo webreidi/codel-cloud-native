@@ -20,27 +20,52 @@
         {
             if (!string.IsNullOrEmpty(Word))
             {
-
                 GuessStatus = new();
 
-                // iterate over the overlapping length of the guess and answer to avoid index exceptions
+                // Iterate over the overlapping length of the guess and answer to avoid index exceptions.
                 var length = Math.Min(Word.Length, answer.Length);
+                var statuses = new LetterStatus[length];
+                var isExactMatch = new bool[length];
+                var unmatchedAnswerLetterCounts = new Dictionary<char, int>();
+
+                // First pass: mark exact matches and count remaining answer letters.
                 for (int i = 0; i < length; i++)
                 {
-                    char letter = Word[i];
-                    bool isDuplicateInAnswer = answer.Count(x => x == letter) > 1;
+                    if (Word[i] == answer[i])
+                    {
+                        isExactMatch[i] = true;
+                        statuses[i] = LetterStatus.Correct;
+                    }
+                    else
+                    {
+                        char answerLetter = answer[i];
+                        unmatchedAnswerLetterCounts[answerLetter] = unmatchedAnswerLetterCounts.GetValueOrDefault(answerLetter) + 1;
+                    }
+                }
 
-                    // Check for duplicate letters
-                    if ((GuessStatus.Contains((letter, LetterStatus.Correct)) || GuessStatus.Contains((letter, LetterStatus.IncorrectPosition))) && !isDuplicateInAnswer)
+                // Second pass: consume unmatched answer letters for incorrect-position matches.
+                for (int i = 0; i < length; i++)
+                {
+                    if (isExactMatch[i])
                     {
-                        GuessStatus.Add((letter, LetterStatus.Incorrect));
+                        continue;
                     }
-                    else // regular Wordle logic
+
+                    char guessLetter = Word[i];
+                    if (unmatchedAnswerLetterCounts.TryGetValue(guessLetter, out var count) && count > 0)
                     {
-                        if (Word[i] == answer[i]) GuessStatus.Add((letter, LetterStatus.Correct));
-                        else if (answer.Contains(letter)) GuessStatus.Add((letter, LetterStatus.IncorrectPosition));
-                        else GuessStatus.Add((letter, LetterStatus.Incorrect));
+                        statuses[i] = LetterStatus.IncorrectPosition;
+                        unmatchedAnswerLetterCounts[guessLetter] = count - 1;
                     }
+                    else
+                    {
+                        statuses[i] = LetterStatus.Incorrect;
+                    }
+                }
+
+                for (int i = 0; i < length; i++)
+                {
+                    GuessStatus.Add((Word[i], statuses[i]));
                 }
 
                 // If guess is longer than answer, mark remaining letters as incorrect

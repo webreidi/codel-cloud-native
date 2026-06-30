@@ -19,7 +19,10 @@ public static class DtoMappingExtensions
             IsWin = gameSession.IsWin,
             CreatedAt = gameSession.CreatedAt,
             RemainingAttempts = gameSession.RemainingAttempts,
-            GuessHistory = gameSession.Attempts.Select(a => a.ToDto()).ToList()
+            GuessHistory = gameSession.Attempts.Select(a => a.ToDto()).ToList(),
+            GuessedLetters = gameSession.GuessedLetters.ToDictionary(
+                kvp => kvp.Key,
+                kvp => kvp.Value.ToString())
         };
     }
 

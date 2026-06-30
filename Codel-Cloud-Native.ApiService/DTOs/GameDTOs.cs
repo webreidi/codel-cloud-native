@@ -13,6 +13,7 @@ public record GameSessionDto
     public DateTime CreatedAt { get; init; }
     public int RemainingAttempts { get; init; }
     public List<GuessResultDto> GuessHistory { get; init; } = new();
+    public Dictionary<char, string> GuessedLetters { get; init; } = new();
 }
 
 /// <summary>

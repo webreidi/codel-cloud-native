@@ -10,6 +10,34 @@
 
 @if (gameSession != null)
 {
+    @if (gameSession.GuessedLetters != null && gameSession.GuessedLetters.Count > 0)
+    {
+        <div class="letter-tracker mb-3">
+            <h5>Letters Guessed:</h5>
+            <div class="d-flex flex-wrap gap-1" role="group" aria-label="Letter tracker">
+                @foreach (char letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+                {
+                    @if (gameSession.GuessedLetters.ContainsKey(letter))
+                    {
+                        var status = gameSession.GuessedLetters[letter];
+                        var cssClass = status switch
+                        {
+                            "Correct" => "btn btn-success",
+                            "IncorrectPosition" => "btn btn-warning",
+                            "Incorrect" => "btn btn-secondary",
+                            _ => "btn btn-outline-dark"
+                        };
+                        <button type="button" class="@cssClass" disabled="true">@letter</button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-outline-dark" disabled="true">@letter</button>
+                    }
+                }
+            </div>
+        </div>
+    }
+
     <p><strong>Attempt #: @(gameSession.Attempts + 1)</strong></p>
 }
 

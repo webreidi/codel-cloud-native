@@ -1,3 +1,4 @@
+using CodeleLogic;
 using CodeleLogic.Services;
 
 namespace CodeleLogic.Models;
@@ -14,6 +15,12 @@ public class GameSession
     public bool IsComplete { get; private set; }
     public bool IsWin { get; private set; }
     public DateTime CreatedAt { get; private set; }
+    
+    /// <summary>
+    /// Dictionary tracking the status of letters that have been guessed
+    /// Key: letter character (uppercase), Value: best status achieved for that letter
+    /// </summary>
+    public Dictionary<char, LetterStatus> GuessedLetters { get; private set; }
 
     public GameSession(string gameId, string targetWord, int maxAttempts = 5)
     {
@@ -21,6 +28,7 @@ public class GameSession
         TargetWord = targetWord ?? throw new ArgumentNullException(nameof(targetWord));
         MaxAttempts = maxAttempts;
         Attempts = new List<GuessResult>();
+        GuessedLetters = new Dictionary<char, LetterStatus>();
         IsComplete = false;
         IsWin = false;
         CreatedAt = DateTime.UtcNow;
@@ -41,6 +49,19 @@ public class GameSession
 
         Attempts.Add(guessResult);
 
+        // Update guessed letters tracking
+        foreach (var letterResult in guessResult.Letters)
+        {
+            char upperLetter = char.ToUpperInvariant(letterResult.Letter);
+
+            // Only update if we don't have this letter or if the new status is better
+            if (!GuessedLetters.ContainsKey(upperLetter) ||
+                GetStatusPriority(letterResult.Status) > GetStatusPriority(GuessedLetters[upperLetter]))
+            {
+                GuessedLetters[upperLetter] = letterResult.Status;
+            }
+        }
+
         // Check if this attempt wins the game
         if (guessResult.IsWin)
         {
@@ -52,6 +73,21 @@ public class GameSession
         {
             IsComplete = true;
         }
+    }
+
+    /// <summary>
+    /// Gets the priority of a letter status for tracking purposes
+    /// Higher priority statuses take precedence over lower ones
+    /// </summary>
+    private static int GetStatusPriority(LetterStatus status)
+    {
+        return status switch
+        {
+            LetterStatus.Correct => 3,
+            LetterStatus.IncorrectPosition => 2,
+            LetterStatus.Incorrect => 1,
+            _ => 0
+        };
     }
 
     /// <summary>

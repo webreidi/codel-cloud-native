@@ -41,6 +41,26 @@ public class DomainServicesTests
     }
 
     [Fact]
+    public void GuessEvaluator_DuplicateLetter_WithOneExactMatchAndOneExtraGuessLetter_ScoresCorrectly()
+    {
+        // Arrange
+        var evaluator = new GuessEvaluator();
+        var guess = "floor";
+        var target = "razor";
+
+        // Act
+        var result = evaluator.EvaluateGuess(guess, target).ToList();
+
+        // Assert
+        Assert.Equal(5, result.Count);
+        Assert.Equal(LetterStatus.Incorrect, result[0].Status); // f
+        Assert.Equal(LetterStatus.Incorrect, result[1].Status); // l
+        Assert.Equal(LetterStatus.Incorrect, result[2].Status); // o (extra)
+        Assert.Equal(LetterStatus.Correct, result[3].Status);   // o (exact)
+        Assert.Equal(LetterStatus.Correct, result[4].Status);   // r (exact)
+    }
+
+    [Fact]
     public void GuessEvaluator_IsWinningGuess_CorrectAnswer_ReturnsTrue()
     {
         // Arrange
