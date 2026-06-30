@@ -1,23 +1,23 @@
 # Codel Cloud Native - GitHub Copilot Instructions
 
-**Codel Cloud Native** is a .NET 9.0 Aspire application featuring a Blazor WebAssembly frontend that implements "Codele" - a developer-themed Wordle game. The application uses SQL Server and Redis containers orchestrated through .NET Aspire's Developer Control Plane.
+**Codel Cloud Native** is a .NET 10.0 Aspire application featuring a Blazor WebAssembly frontend that implements "Codele" - a developer-themed Wordle game. The application uses SQL Server and Redis containers orchestrated through .NET Aspire's Developer Control Plane.
 
 **Always reference these instructions first and fallback to search or bash commands only when you encounter unexpected information that does not match the info here.**
 
 ## Working Effectively
 
 ### Prerequisites - CRITICAL SETUP REQUIRED
-**You MUST install .NET 9.0 SDK and Aspire workload before any development work:**
+**You MUST install .NET 10.0 SDK and Aspire workload before any development work:**
 
-1. **Install .NET 9.0 SDK** (takes ~3 minutes, NEVER CANCEL):
+1. **Install .NET 10.0 SDK** (takes ~3 minutes, NEVER CANCEL):
    ```bash
-   curl -sSL https://dotnet.microsoft.com/download/dotnet/scripts/v1/dotnet-install.sh | bash -s -- --channel 9.0 --install-dir ~/.dotnet
+   curl -sSL https://dotnet.microsoft.com/download/dotnet/scripts/v1/dotnet-install.sh | bash -s -- --channel 10.0 --install-dir ~/.dotnet
    export PATH=$HOME/.dotnet:$PATH
    ```
    
-2. **Verify .NET 9.0 installation**:
+2. **Verify .NET 10.0 installation**:
    ```bash
-   dotnet --version  # Should show 9.0.x
+   dotnet --version  # Should show 10.0.x
    ```
 
 **Install Aspire templates**
@@ -116,7 +116,7 @@ Codel-Cloud-Native.sln
 ## Common Development Tasks
 
 ### Making Code Changes:
-1. **Always validate prerequisites first** (PATH set, .NET 9.0, Aspire workload)
+1. **Always validate prerequisites first** (PATH set, .NET 10.0, Aspire workload)
 2. **Build after changes**: `dotnet build` (17 seconds)
 3. **Test game logic**: `dotnet test --filter "TestGameLogic"` (7 seconds)
 4. **DO NOT** attempt full application startup in CI environments
@@ -129,11 +129,11 @@ Codel-Cloud-Native.sln
 
 ### Debugging Integration Issues:
 - If integration tests fail with timeout errors, this is expected in CI
-- If build fails with ".NET 9.0 not supported", install .NET 9.0 SDK first
+- If build fails with ".NET 10.0 not supported", install .NET 10.0 SDK first
 - If Aspire commands fail, install Aspire workload first
 
 ## Technology Stack
-- **.NET 9.0** - Required, not backward compatible with .NET 8.0
+- **.NET 10.0** - Required, not backward compatible with .NET 9.0
 - **Aspire 9.3.0** - Container orchestration and service discovery
 - **Blazor WebAssembly** - Frontend framework
 - **SQL Server** - Database (via Docker container)
@@ -147,7 +147,7 @@ Codel-Cloud-Native.sln
 
 | Operation | Duration | Timeout Setting | Notes |
 |-----------|----------|----------------|-------|
-| .NET 9.0 SDK Install | ~3 minutes | 600+ seconds | One-time setup |
+| .NET 10.0 SDK Install | ~3 minutes | 600+ seconds | One-time setup |
 | Aspire Workload Install | ~2-3 minutes | 600+ seconds | One-time setup |
 | First `dotnet restore` | ~51 seconds | 120+ seconds | Downloads packages |
 | `dotnet build` | ~17 seconds | 60+ seconds | Compiles code |
