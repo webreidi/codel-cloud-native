@@ -52,7 +52,7 @@ public class GameSession
         // Update guessed letters tracking
         foreach (var letterResult in guessResult.Letters)
         {
-            char upperLetter = char.ToUpper(letterResult.Letter);
+            char upperLetter = char.ToUpperInvariant(letterResult.Letter);
 
             // Only update if we don't have this letter or if the new status is better
             if (!GuessedLetters.ContainsKey(upperLetter) ||
