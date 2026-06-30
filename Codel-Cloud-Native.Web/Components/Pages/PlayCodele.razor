@@ -246,9 +246,13 @@
         {
             await guessInput.FocusAsync();
         }
-        catch
+        catch (InvalidOperationException)
         {
-            // Input may not be available yet during early renders.
+            // ElementReference may not be available yet during early renders.
+        }
+        catch (JSException)
+        {
+            // JS interop can fail during navigation/disconnect; focus is best-effort.
         }
     }
 
