@@ -20,16 +20,6 @@
    dotnet --version  # Should show 10.0.x
    ```
 
-**Install Aspire templates**
-   ```bash
-dotnet new install Aspire.ProjectTemplates::9.4.0 --force
-   ```
-
-4. **Verify Aspire installation**:
-   ```bash
-   dotnet new list aspire # Should show 'aspire' in the list
-   ```
-
 ### Build and Test Process
 **Set PATH and run from repository root:**
 ```bash
@@ -133,8 +123,8 @@ Codel-Cloud-Native.sln
 - If Aspire commands fail, install Aspire workload first
 
 ## Technology Stack
-- **.NET 10.0** - Required, not backward compatible with .NET 9.0
-- **Aspire 9.3.0** - Container orchestration and service discovery
+- **.NET 10.0** - Required, not backward compatible with .NET 10.0
+- **Aspire 13.4.6** - Container orchestration and service discovery
 - **Blazor WebAssembly** - Frontend framework
 - **SQL Server** - Database (via Docker container)
 - **Redis** - Caching (via Docker container)
