@@ -64,7 +64,7 @@
 <br>
 
 <!-- input box for the player to type and submit a guess -->
-<input placeholder="Type your guess" @bind="newGuess" @ref="guessInput" autofocus />
+<input placeholder="Type your guess" aria-label="Guess" @bind="newGuess" @ref="guessInput" autofocus />
 
 <button type="button" class="btn btn-primary" @onclick="SubmitGuess" disabled="@(gameSession?.IsComplete ?? false)">Submit</button>
 
