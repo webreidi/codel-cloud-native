@@ -14,7 +14,7 @@
     {
         <div class="letter-tracker mb-3">
             <h5>Letters Guessed:</h5>
-            <div class="btn-group" role="group" aria-label="Letter tracker">
+            <div class="d-flex flex-wrap gap-1" role="group" aria-label="Letter tracker">
                 @foreach (char letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
                 {
                     @if (gameSession.GuessedLetters.ContainsKey(letter))
