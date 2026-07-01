@@ -32,7 +32,7 @@
                         {
                             char letter = Char.ToUpper(letterResult.Letter);
                             string buttonClass = GetButtonClass(letterResult.Status);
-                            <button type="button" class="btn @buttonClass letter-button">@letter</button>
+                            <button type="button" class="btn @buttonClass letter-button" disabled="true">@letter</button>
                         }
                     </div>
                 }
