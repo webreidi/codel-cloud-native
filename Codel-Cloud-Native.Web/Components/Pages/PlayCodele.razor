@@ -23,7 +23,7 @@
     <section class="card-panel">
         <h5>Your guesses</h5>
         <div class="guess-history">
-            @if (gameSession?.GuessHistory != null)
+            @if (gameSession?.GuessHistory?.Count > 0)
             {
                 @foreach (var guessResult in gameSession.GuessHistory)
                 {
