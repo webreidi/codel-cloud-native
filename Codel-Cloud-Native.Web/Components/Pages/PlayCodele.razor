@@ -20,37 +20,6 @@
         }
     </section>
 
-    @if (gameSession != null)
-    {
-        @if (gameSession.GuessedLetters != null && gameSession.GuessedLetters.Count > 0)
-        {
-            <section class="card-panel letter-tracker">
-                <h5>Letters guessed</h5>
-                <div class="letter-grid" role="group" aria-label="Letter tracker">
-                    @foreach (char letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-                    {
-                        @if (gameSession.GuessedLetters.ContainsKey(letter))
-                        {
-                            var status = gameSession.GuessedLetters[letter];
-                            var cssClass = status switch
-                            {
-                                "Correct" => "btn btn-success",
-                                "IncorrectPosition" => "btn btn-warning",
-                                "Incorrect" => "btn btn-secondary",
-                                _ => "btn btn-outline-dark"
-                            };
-                            <button type="button" class="@cssClass" disabled="true">@letter</button>
-                        }
-                        else
-                        {
-                            <button type="button" class="btn btn-outline-dark" disabled="true">@letter</button>
-                        }
-                    }
-                </div>
-            </section>
-        }
-    }
-
     <section class="card-panel">
         <h5>Your guesses</h5>
         <div class="guess-history">
@@ -79,6 +48,34 @@
         <input placeholder="Type your guess" aria-label="Guess" @bind="newGuess" @ref="guessInput" autofocus />
         <button type="button" class="btn btn-primary" @onclick="SubmitGuess" disabled="@(gameSession?.IsComplete ?? false)">Submit</button>
     </section>
+
+    @if (gameSession != null && gameSession.GuessedLetters != null && gameSession.GuessedLetters.Count > 0)
+    {
+        <section class="card-panel letter-tracker">
+            <h5>Letters guessed</h5>
+            <div class="letter-grid" role="group" aria-label="Letter tracker">
+                @foreach (char letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+                {
+                    @if (gameSession.GuessedLetters.ContainsKey(letter))
+                    {
+                        var status = gameSession.GuessedLetters[letter];
+                        var cssClass = status switch
+                        {
+                            "Correct" => "btn btn-success",
+                            "IncorrectPosition" => "btn btn-warning",
+                            "Incorrect" => "btn btn-secondary",
+                            _ => "btn btn-outline-dark"
+                        };
+                        <button type="button" class="@cssClass" disabled="true">@letter</button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-outline-dark" disabled="true">@letter</button>
+                    }
+                }
+            </div>
+        </section>
+    }
 
     @if (displayGuessSizeMsg == true)
     {

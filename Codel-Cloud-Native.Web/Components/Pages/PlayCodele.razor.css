@@ -1,14 +1,14 @@
 .game-shell {
     display: grid;
-    gap: 1.25rem;
+    gap: 1rem;
 }
 
 .game-hero,
 .card-panel {
     background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 1.25rem;
-    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.07);
+    border: 1px solid #d3d6da;
+    border-radius: 1rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.03);
 }
 
 .game-hero {
@@ -16,7 +16,7 @@
     justify-content: space-between;
     align-items: center;
     gap: 1rem;
-    padding: 1.5rem;
+    padding: 1.25rem 1.35rem;
 }
 
 .eyebrow {
@@ -24,7 +24,7 @@
     font-size: 0.8rem;
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: #2563eb;
+    color: #538d4e;
     font-weight: 700;
 }
 
@@ -32,20 +32,21 @@
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.7rem 1rem;
+    padding: 0.65rem 0.9rem;
     border-radius: 999px;
-    background: #eff6ff;
-    color: #1d4ed8;
+    background: #f3f3f1;
+    color: #1a1a1a;
+    font-size: 0.95rem;
 }
 
 .card-panel {
-    padding: 1.25rem 1.5rem;
+    padding: 1rem 1.15rem;
 }
 
 .letter-grid {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.4rem;
 }
 
 .guess-history {
@@ -61,8 +62,8 @@
 }
 
 .letter-button {
-    min-width: 2.8rem;
-    border-radius: 0.7rem;
+    min-width: 2.7rem;
+    border-radius: 0.5rem;
     font-weight: 700;
 }
 
@@ -75,10 +76,10 @@
 
 .input-panel input {
     flex: 1 1 220px;
-    padding: 0.8rem 1rem;
+    padding: 0.9rem 1rem;
     border-radius: 999px;
-    border: 1px solid #cbd5e1;
-    box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.06);
+    border: 1px solid #d3d6da;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .message {
@@ -87,11 +88,11 @@
 }
 
 .message.error {
-    color: #dc2626;
+    color: #c41e3a;
 }
 
 .muted-text {
-    color: #64748b;
+    color: #787c7e;
     margin: 0;
 }
 
