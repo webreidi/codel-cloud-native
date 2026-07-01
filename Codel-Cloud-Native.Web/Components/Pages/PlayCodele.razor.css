@@ -1,0 +1,104 @@
+.game-shell {
+    display: grid;
+    gap: 1rem;
+}
+
+.game-hero,
+.card-panel {
+    background: #ffffff;
+    border: 1px solid #d3d6da;
+    border-radius: 1rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.03);
+}
+
+.game-hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem 1.35rem;
+}
+
+.eyebrow {
+    margin-bottom: 0.25rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #538d4e;
+    font-weight: 700;
+}
+
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 0.9rem;
+    border-radius: 999px;
+    background: #f3f3f1;
+    color: #1a1a1a;
+    font-size: 0.95rem;
+}
+
+.card-panel {
+    padding: 1rem 1.15rem;
+}
+
+.letter-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.guess-history {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.guess-row {
+    display: flex;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+}
+
+.letter-button {
+    min-width: 2.7rem;
+    border-radius: 0.5rem;
+    font-weight: 700;
+}
+
+.input-panel {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.input-panel input {
+    flex: 1 1 220px;
+    padding: 0.9rem 1rem;
+    border-radius: 999px;
+    border: 1px solid #d3d6da;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.message {
+    margin: 0;
+    font-weight: 600;
+}
+
+.message.error {
+    color: #c41e3a;
+}
+
+.muted-text {
+    color: #787c7e;
+    margin: 0;
+}
+
+@media (max-width: 640px) {
+    .game-hero {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

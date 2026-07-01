@@ -3,18 +3,57 @@
 @inject IJSRuntime JSRuntime
 @rendermode InteractiveServer
 
-<h3>Play Codele</h3>
-<p>Guess the @maxLength letter, coding-related word in @maxAttempts tries or less!</p>
+<div class="game-shell">
+    <section class="game-hero">
+        <div>
+            <p class="eyebrow">Developer Wordle</p>
+            <h3>Play Codele</h3>
+            <p>Guess the @maxLength-letter, coding-related word in @maxAttempts tries or less.</p>
+        </div>
 
-<br>
+        @if (gameSession != null)
+        {
+            <div class="status-pill">
+                <span>Attempt</span>
+                <strong>@(gameSession.Attempts + 1)</strong>
+            </div>
+        }
+    </section>
 
-@if (gameSession != null)
-{
-    @if (gameSession.GuessedLetters != null && gameSession.GuessedLetters.Count > 0)
+    <section class="card-panel">
+        <h5>Your guesses</h5>
+        <div class="guess-history">
+            @if (gameSession?.GuessHistory?.Count > 0)
+            {
+                @foreach (var guessResult in gameSession.GuessHistory)
+                {
+                    <div class="guess-row" role="group" aria-label="Guess result">
+                        @foreach (var letterResult in guessResult.Letters)
+                        {
+                            char letter = Char.ToUpper(letterResult.Letter);
+                            string buttonClass = GetButtonClass(letterResult.Status);
+                            <button type="button" class="btn @buttonClass letter-button" disabled="true">@letter</button>
+                        }
+                    </div>
+                }
+            }
+            else
+            {
+                <p class="muted-text">Your guesses will appear here as you play.</p>
+            }
+        </div>
+    </section>
+
+    <section class="card-panel input-panel">
+        <input placeholder="Type your guess" aria-label="Guess" @bind="newGuess" @ref="guessInput" autofocus />
+        <button type="button" class="btn btn-primary" @onclick="SubmitGuess" disabled="@(gameSession?.IsComplete ?? false)">Submit</button>
+    </section>
+
+    @if (gameSession != null && gameSession.GuessedLetters != null && gameSession.GuessedLetters.Count > 0)
     {
-        <div class="letter-tracker mb-3">
-            <h5>Letters Guessed:</h5>
-            <div class="d-flex flex-wrap gap-1" role="group" aria-label="Letter tracker">
+        <section class="card-panel letter-tracker">
+            <h5>Letters guessed</h5>
+            <div class="letter-grid" role="group" aria-label="Letter tracker">
                 @foreach (char letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
                 {
                     @if (gameSession.GuessedLetters.ContainsKey(letter))
@@ -35,71 +74,39 @@
                     }
                 }
             </div>
-        </div>
+        </section>
     }
 
-    <p><strong>Attempt #: @(gameSession.Attempts + 1)</strong></p>
-}
-
-<!-- display the player's guesses -->
-<table>
-    @if (gameSession?.GuessHistory != null)
+    @if (displayGuessSizeMsg == true)
     {
-        @foreach (var guessResult in gameSession.GuessHistory)
-        {
-            <tr>
-                <div class="btn-group" role="group" aria-label="Basic example">
-                    @foreach (var letterResult in guessResult.Letters)
-                    {
-                        char letter = Char.ToUpper(letterResult.Letter);
-                        string buttonClass = GetButtonClass(letterResult.Status);
-                        <button type="button" class="btn @buttonClass">@letter</button>
-                    }
-                </div>
-            </tr>
-            <br>
-        }
+        <p class="message error">Guess must be @maxLength characters long</p>
     }
-</table>
-<br>
 
-<!-- input box for the player to type and submit a guess -->
-<input placeholder="Type your guess" aria-label="Guess" @bind="newGuess" @ref="guessInput" autofocus />
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <p class="message error">@errorMessage</p>
+    }
 
-<button type="button" class="btn btn-primary" @onclick="SubmitGuess" disabled="@(gameSession?.IsComplete ?? false)">Submit</button>
-
-<!-- display message if guess is not 5 characters long -->
-@if (displayGuessSizeMsg == true)
-{
-    <p style="color: rgb(197, 3, 3);">Guess must be @maxLength characters long</p>
-}
-
-<!-- display error messages -->
-@if (!string.IsNullOrEmpty(errorMessage))
-{
-    <p style="color: rgb(197, 3, 3);">@errorMessage</p>
-}
-
-<!-- modal popup to display the game outcome -->
-@if (showModal == true && gameSession != null)
-{
-    <div class="modal fade show" id="myModal" style="display:block; background-color: rgba(10,10,10,.8);" aria-modal="true"
-        role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">@gameStatusMessage</h4>
-                </div>
-                <div class="modal-body">
-                    <p><strong>Total Attempts: </strong>@gameSession.Attempts / @gameSession.MaxAttempts</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-success" @onclick="StartNewGame">New Game?</button>
+    @if (showModal == true && gameSession != null)
+    {
+        <div class="modal fade show" id="myModal" style="display:block; background-color: rgba(10,10,10,.8);" aria-modal="true"
+            role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">@gameStatusMessage</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p><strong>Total Attempts: </strong>@gameSession.Attempts / @gameSession.MaxAttempts</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-success" @onclick="StartNewGame">New Game?</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-}
+    }
+</div>
 
 @code {
     // Current game session from API
